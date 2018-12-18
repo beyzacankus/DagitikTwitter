@@ -15,15 +15,13 @@ class loggerThread(threading.Thread):
 
 
 def log_runner(logq):
-    while True:
-        queueLock.acquire()
+    while True:        
         data = logq.get()
         if data == "Quit":
             data = "Quit received " + " - " + time.ctime(time.time())
             print(data)
             break
         print(data)
-        queueLock.release()
 
 
 class senderThread(threading.Thread):
