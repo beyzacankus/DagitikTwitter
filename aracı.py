@@ -81,6 +81,10 @@ class clientReader(threading.Thread):
             inp = input()
             inp = inp.strip("\n")
             # Eger "HELO" mesajiysa kullanici bilgileri eklenip yollaniyor
+            # HELO <nickname> seklinde mesaj giriliyor. 
+            # Protokolde uuid,ip,port,tip ve nickname parametreleri alınıyordu,
+            # bunların hepsini input olarak almak zor olduğu için uuid,ip,port,tip
+            # bilgileri koddan ainiyor, sadece HELO mesajının yanında nick parametresi alınıyor.
             if inp[:4] == "HELO":
                 data = inp[:4] + " " + self.data + inp[4:len(self.data)]
                 self.clientq.put(data)
