@@ -16,7 +16,7 @@ class LoginWindow(QtWidgets.QWidget):
 
         self.login_text = QtWidgets.QLabel("Lütfen kullanıcı adınızı girin")
 
-        self.username_space = QtWidgets.QTextEdit()
+        self.username_space = QtWidgets.QLineEdit()
 
         self.login_button = QtWidgets.QPushButton("Kaydol / Giriş Yap")
 
@@ -48,7 +48,6 @@ class LoginWindow(QtWidgets.QWidget):
 
 
 
-
         self.setLayout(v_box)
 
         self.login_button.clicked.connect(self.click)
@@ -57,7 +56,9 @@ class LoginWindow(QtWidgets.QWidget):
 
     def click(self):
 
-        pass
+        user_nickname = self.username_space.text()
+
+        # user nickname kontrolü yapılacak
 
 
 
