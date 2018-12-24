@@ -3,7 +3,7 @@ import queue
 import socket
 import time
 import uuid
-
+import util_functions
 
 class loggerThread(threading.Thread):
     def __init__(self, logq):

@@ -2,6 +2,8 @@ import sys
 
 from PyQt5 import QtWidgets, QtGui
 
+from PyQt5.QtWidgets import QWidget, QDesktopWidget, QApplication
+
 # Giriş Ekranı için UI tasarımı
 
 class LoginWindow(QtWidgets.QWidget):
@@ -46,19 +48,19 @@ class LoginWindow(QtWidgets.QWidget):
 
         v_box.addWidget(self.icon)
 
-
-
         self.setLayout(v_box)
 
-        self.login_button.clicked.connect(self.click)
+        self.login_button.clicked.connect(self.login_click)
 
         self.show()
 
-    def click(self):
+    def login_click(self):
 
         user_nickname = self.username_space.text()
 
-        # user nickname kontrolü yapılacak
+        # user nickname kontrolü yapılacak red veya anasayfaya yönlendirme yapılacak.
+
+
 
 
 
