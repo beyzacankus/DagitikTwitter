@@ -24,10 +24,9 @@ class loggerThread(threading.Thread):
 
 #  Peer'in client tarafi tanimlaniyor.
 class clientThread(threading.Thread):
-    def __init__(self, clientq, serverq, logq, ip, port, c_uuid, public_key, private_key):
+    def __init__(self, clientq, logq, ip, port, c_uuid, public_key, private_key):
         threading.Thread.__init__(self)
         self.clientq = clientq
-        self.serverq = serverq
         self.logq = logq
         self.ip = ip
         self.port = port
@@ -105,10 +104,9 @@ class clientSender(threading.Thread):
 
 # Server için thread
 class serverThread(threading.Thread):
-    def __init__(self, serverq, clientq, logq, soket, dict, public_key, private_key):
+    def __init__(self, serverq, logq, soket, dict, public_key, private_key):
         threading.Thread.__init__(self)
         self.serverq = serverq
-        self.clientq = clientq
         self.logq = logq
         self.soket = soket
         self.dict = dict
@@ -216,15 +214,13 @@ def main():
     # MAC adresiyle UUID
     client_uuid = uuid.getnode()
 
-    queueLock = threading.Lock()
     logQueue = queue.Queue()
     ServerQueue = queue.Queue()
     ClientQueue = queue.Queue()
-    threads = []
 
-    server_thread = serverThread(ServerQueue, ClientQueue, logQueue, s1, server_dict, public_key, private_key)
+    server_thread = serverThread(ServerQueue, logQueue, s1, server_dict, public_key, private_key)
     server_thread.start()
-    client_thread = clientThread(ClientQueue, ServerQueue, logQueue,  ip, port, client_uuid, public_key, private_key)
+    client_thread = clientThread(ClientQueue, logQueue,  ip, port, client_uuid, public_key, private_key)
     client_thread.start()
     logger_thread = loggerThread(logQueue)
     logger_thread.start()
