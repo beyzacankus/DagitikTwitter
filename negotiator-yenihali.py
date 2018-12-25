@@ -25,7 +25,7 @@ class clientThread(threading.Thread):
         self.clientq = clientq
         self.serverq = serverq
         self.logq = logq
-        self.ip = port
+        self.ip = ip
         self.port = port
         self.c_uuid = c_uuid
 
