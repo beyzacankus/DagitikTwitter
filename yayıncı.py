@@ -258,22 +258,18 @@ def append_dictionary(data, logq):
 # HELO mesajıyla alınan input ip,port ve nick parametrelerine ayrıştırılıyor
 def parse_input(inp):
     inp = str(inp)
-    i = 6
-    j = 0
     nick = ""
     ip = ""
     port = ""
-    while i < len(inp):
-        if inp[i - 1] == " ":
-            ip = inp[5:i - 1]
-            j = i
-            while i < len(inp):
-                if inp[i - 1] == " ":
-                    port = inp[j:i - 1]
-                    j = i
-                    nick = inp[j:len(inp)]
-                i += 1
-        i += 1
+    bann = ""
+    delimiter = " "
+    list = inp.split(delimiter)
+    ip = list[0]
+    port = list[1]
+    type = list[2]
+    nick = list[3]
+    bann = list[4]
+
     return ip, port, nick
 
 

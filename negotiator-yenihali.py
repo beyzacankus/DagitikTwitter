@@ -5,6 +5,7 @@ import time
 import uuid
 
 from loggerThread import loggerThread
+from util_functions import *
 
 #  Bir peer icin hem client hem de server var.
 
@@ -81,12 +82,12 @@ class clientSender(threading.Thread):
 
 # Server için thread
 class serverThread(threading.Thread):
-    def __init__(self, serverq, logq, soket, dict):
+    def __init__(self, serverq, logq, soket, peer_dict):
         threading.Thread.__init__(self)
         self.serverq = serverq
         self.logq = logq
         self.soket = soket
-        self.dict = dict
+        self.peer_dict = peer_dict # uuid ve baglanti adreslerinin oldugu dictionary
 
     def run(self):
         log = "Aracı Server Thread çalışmaya başladı.\n"
@@ -108,14 +109,14 @@ class serverThread(threading.Thread):
                 if rps[:4] == "HELO":
                     c_uuid = rps[5:19]
                     # Eğer önceden kayıtlıysa "WLCM" cevabı veriliyor
-                    if c_uuid in self.dict:
+                    if c_uuid in self.peer_dict:
                         send = "WLCM " + c_uuid
                         c.send(send.encode())
                     # Kayıtlı değilse yeni kayıt oluşturup WAIT cevabı veriliyor
                     else:
-                        self.dict[c_uuid] = rps[20:len(rps)]
-                        data = c_uuid + " -" + rps[19:len(rps)]
-                        append_dictionary(data, self.logq)
+                        self.peer_dict[c_uuid] = rps[20:len(rps)]
+                        data = c_uuid + " -" + rps[19:len(rps)] + " NB"  # Sonradan ozellikle yayincilarda hangi kullanıcının engellendigini gormemizi saglayacak: NB (Engelli Degil) - B (Engelli)
+                        appendToPeerDictionary(data, self.logq)
                         send = "WAIT " + c_uuid
                         c.send(send.encode())
 
@@ -127,7 +128,7 @@ class serverThread(threading.Thread):
                 # Dictionary'deki kayıtlar yollanıyor
                 elif rps[:4] == "LIST":
                     if flag == 1:
-                        c.send(str(self.dict).encode())
+                        c.send(str(self.peer_dict).encode())
                     else:
                         c.send("AUTH".encode())
 
@@ -161,7 +162,7 @@ def main():
     # Kullanıcı kayıtlarının tutulacağı dictionary
     # write_dictionary ile text dosyası çağırılıp önceki kayıtlar dictionary içerisine yazılıyor
     server_dict = {}
-    write_dictionary(server_dict, logQueue)
+    writeToPeerDictionary(server_dict, logQueue)
 
     # MAC adresiyle UUID
     client_uuid = uuid.getnode()
@@ -176,50 +177,23 @@ def main():
 
 
 
-# text dosyasındaki kayıtlar dictionary'e yazılıyor.UUID key değeri, geri kalan bilgiler(ip,port,tip,nick) valuelar
-def write_dictionary(server_dict, logq):
-    fid = open("dictionary.txt", "r+")
-    for line in fid:
-        listedline = line.strip().split('-')
-        if len(listedline) > 1:
-            server_dict[listedline[0].strip()] = listedline[1].strip()
-
-    log = "Aracı tarafından sözlük dosyasındaki kayıt sunucu sözlüğüne çekildi.\n"
-    logq.put(log)
-
-    fid.close()
-
-
-# yeni kaydı text dosyasına ekleme
-def append_dictionary(data, logq):
-    f = open("dictionary.txt", "a+")
-    f.write("%s" % data)
-
-    log = "Aracı tarafından yeni kayıt sözlük dosyasına yazıldı.\n"
-    logq.put(log)
-
-    f.close()
 
 
 # HELO mesajıyla alınan input ip,port ve nick parametrelerine ayrıştırılıyor
 def parse_input(inp):
     inp = str(inp)
-    i = 6
-    j = 0
     nick = ""
     ip = ""
     port = ""
-    while i < len(inp):
-        if inp[i - 1] == " ":
-            ip = inp[5:i - 1]
-            j = i
-            while i < len(inp):
-                if inp[i - 1] == " ":
-                    port = inp[j:i - 1]
-                    j = i
-                    nick = inp[j:len(inp)]
-                i += 1
-        i += 1
+    bann = ""
+    delimiter = " "
+    list = inp.split(delimiter)
+    ip = list[0]
+    port = list[1]
+    type = list[2]
+    nick = list[3]
+    bann = list[4]
+
     return ip, port, nick
 
 
