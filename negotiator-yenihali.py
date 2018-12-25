@@ -5,7 +5,6 @@ import time
 import uuid
 
 from loggerThread import loggerThread
-logq = queue.Queue
 
 #  Bir peer icin hem client hem de server var.
 
@@ -116,7 +115,7 @@ class serverThread(threading.Thread):
                     else:
                         self.dict[c_uuid] = rps[20:len(rps)]
                         data = c_uuid + " -" + rps[19:len(rps)]
-                        append_dictionary(data)
+                        append_dictionary(data, self.logq)
                         send = "WAIT " + c_uuid
                         c.send(send.encode())
 
@@ -144,6 +143,9 @@ class serverThread(threading.Thread):
 
 
 def main():
+    logQueue = queue.Queue()
+    logger_thread = loggerThread(logQueue)
+    logger_thread.start()
 
     # Server için soket bağlantıları
     s1 = socket.socket()
@@ -159,12 +161,11 @@ def main():
     # Kullanıcı kayıtlarının tutulacağı dictionary
     # write_dictionary ile text dosyası çağırılıp önceki kayıtlar dictionary içerisine yazılıyor
     server_dict = {}
-    write_dictionary(server_dict)
+    write_dictionary(server_dict, logQueue)
 
     # MAC adresiyle UUID
     client_uuid = uuid.getnode()
 
-    logQueue = queue.Queue()
     ServerQueue = queue.Queue()
     ClientQueue = queue.Queue()
 
@@ -172,12 +173,11 @@ def main():
     server_thread.start()
     client_thread = clientThread(ClientQueue, logQueue, ip, port, client_uuid)
     client_thread.start()
-    logger_thread = loggerThread(logQueue)
-    logger_thread.start()
+
 
 
 # text dosyasındaki kayıtlar dictionary'e yazılıyor.UUID key değeri, geri kalan bilgiler(ip,port,tip,nick) valuelar
-def write_dictionary(server_dict):
+def write_dictionary(server_dict, logq):
     fid = open("dictionary.txt", "r+")
     for line in fid:
         listedline = line.strip().split('-')
@@ -191,7 +191,7 @@ def write_dictionary(server_dict):
 
 
 # yeni kaydı text dosyasına ekleme
-def append_dictionary(data):
+def append_dictionary(data, logq):
     f = open("dictionary.txt", "a+")
     f.write("%s" % data)
 
