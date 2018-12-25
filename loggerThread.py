@@ -5,20 +5,18 @@ import threading
 import queue
 import time
 
-logQueue = queue.Queue()
-senderQueue = queue.Queue()
-
 class loggerThread(threading.Thread):
-    def __init__(self):
+    def __init__(self, logQueue):
         threading.Thread.__init__(self)
+        self.logQueue = logQueue
 
     def run(self):
         exitFlag = False
         file = open("log.txt", 'a')
         file.write("Logger starting.\n")
         while not exitFlag:
-            if not logQueue.empty():
-                msg = logQueue.get()
+            if not self.logQueue.empty():
+                msg = self.logQueue.get()
                 if msg == "QUIT":
                     exitFlag = True
                     log = "Logger: QUIT received.\n"
@@ -26,5 +24,5 @@ class loggerThread(threading.Thread):
                     log = str(time.ctime(time.time())) + " - " + str(msg) + "\n"
                 file.write(log)
 
-        file.write("Logger exiting.")
+        file.write("Logger exiting.\n")
         file.close()
