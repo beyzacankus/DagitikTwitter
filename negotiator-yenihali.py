@@ -20,11 +20,13 @@ class loggerThread(threading.Thread):
 
 #  Peer'in client tarafi tanimlaniyor.
 class clientThread(threading.Thread):
-    def __init__(self, clientq, serverq, logq, c_uuid):
+    def __init__(self, clientq, serverq, logq, ip, port, c_uuid):
         threading.Thread.__init__(self)
         self.clientq = clientq
         self.serverq = serverq
         self.logq = logq
+        self.ip = port
+        self.port = port
         self.c_uuid = c_uuid
 
     def run(self):
@@ -41,17 +43,19 @@ class clientThread(threading.Thread):
             if inp[:4] == "HELO":
 
                 # Mesajla gelen parametreler parse_input metoduyla ayrıştırılıyor
-                ip, port, nick = parse_input(inp)
-                host = ip
-                port = int(port)
+                # Buradaki ip ve port bağlanılan server'ın ipleri
+                server_ip, server_port, nick = parse_input(inp)
+                host = server_ip
+                port = int(server_port)
 
                 # Alınan port ve input bilgileri ile bağlantı kuruluyor
                 s.connect((host, port))
                 type = "A"
 
                 # Client oluşturulduğu zaman atanan UUID ve tip bilgileri de eklenip HELO mesajı
-                # tüm parametreler ile yollanıyor.
-                data = inp[:4] + " " + str(self.c_uuid) + " " + ip + " " + str(port) + " " + type + " " + nick
+                # tüm parametreler ile yollanıyor. HELO mesajına kendi ip ve portu koyuluyor,
+                # çünkü karşı tarafın listesine kendi ip ve portunu vermek zorunda. 
+                data = inp[:4] + " " + str(self.c_uuid) + " " + self.ip + " " + str(self.port) + " " + type + " " + nick
                 self.clientq.put(data)
 
             else:
@@ -142,6 +146,10 @@ def main():
     port = 12345
     s1.bind((host, port))
     s1.listen(5)
+    
+    # Kendi ip ve port bilgilerini client alıyor, bunları karşı tarafa atıcak
+    ip = socket.gethostbyname(socket.gethostname())
+    port = 12345
 
     # Kullanıcı kayıtlarının tutulacağı dictionary
     # write_dictionary ile text dosyası çağırılıp önceki kayıtlar dictionary içerisine yazılıyor
@@ -159,7 +167,7 @@ def main():
 
     server_thread = serverThread(ServerQueue, ClientQueue, logQueue, s1, server_dict)
     server_thread.start()
-    client_thread = clientThread(ClientQueue, ServerQueue, logQueue, client_uuid)
+    client_thread = clientThread(ClientQueue, ServerQueue, logQueue,ip,port, client_uuid)
     client_thread.start()
     logger_thread = loggerThread(logQueue)
     logger_thread.start()
