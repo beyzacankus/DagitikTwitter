@@ -18,7 +18,7 @@ class clientThread(threading.Thread):
         self.ip = ip
         self.port = port
         self.c_uuid = c_uuid
-
+        
     def run(self):
         s = socket.socket()
 
@@ -60,7 +60,7 @@ class clientThread(threading.Thread):
             time.sleep(1)
             print(s.recv(1024).decode())
 
-
+        
 # Client için sender thread
 class clientSender(threading.Thread):
     def __init__(self, logq, clientq, s):
@@ -164,15 +164,13 @@ def main():
     # MAC adresiyle UUID
     client_uuid = uuid.getnode()
 
-    queueLock = threading.Lock()
     logQueue = queue.Queue()
     ServerQueue = queue.Queue()
     ClientQueue = queue.Queue()
-    threads = []
 
     server_thread = serverThread(ServerQueue, logQueue, s1, server_dict)
     server_thread.start()
-    client_thread = clientThread(ClientQueue, logQueue,ip,port, client_uuid)
+    client_thread = clientThread(ClientQueue, logQueue, ip, port, client_uuid)
     client_thread.start()
     logger_thread = loggerThread(logQueue)
     logger_thread.start()
