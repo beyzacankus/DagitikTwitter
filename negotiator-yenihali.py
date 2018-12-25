@@ -21,7 +21,7 @@ class clientThread(threading.Thread):
     def run(self):
         s = socket.socket()
 
-        log = "Client çalışmaya başladı.\n"
+        log = "Aracı client çalışmaya başladı.\n"
         self.logq.put(log)
 
         # Mesajları soketin diğer ucuna yollamak için sender Thread oluşturuluyor
@@ -44,7 +44,7 @@ class clientThread(threading.Thread):
                 s.connect((host, port))
                 type = "A"
 
-                log = "IP: "+ str(host) + " Port: " + str(port) + " ile bağlantı kuruldu.\n"
+                log = "Aracıdan IP: "+ str(host) + " Port: " + str(port) + " ile bağlantı kuruldu.\n"
                 self.logq.put(log)
 
                 # Client oluşturulduğu zaman atanan UUID ve tip bilgileri de eklenip HELO mesajı
@@ -69,7 +69,7 @@ class clientSender(threading.Thread):
         self.s = s
 
     def run(self):
-        log = "Client Sender Thread çalışmaya başladı.\n"
+        log = "Aracı Client Sender Thread çalışmaya başladı.\n"
         self.logq.put(log)
 
         while True:
@@ -89,12 +89,12 @@ class serverThread(threading.Thread):
         self.dict = dict
 
     def run(self):
-        log = "Server Thread çalışmaya başladı.\n"
+        log = "Aracı Server Thread çalışmaya başladı.\n"
         self.logq.put(log)
 
         while True:
             c, addr = self.soket.accept()
-            log = "Şu adresle bağlantı sağlandı: " + str(addr)
+            log = "Aracı şu adresle bağlantı sağlandı: " + str(addr)
             self.logq.put(log)
 
             # Kullanıcı kayıt olup olmadığı flag ile tutuluyor
@@ -119,7 +119,7 @@ class serverThread(threading.Thread):
                         send = "WAIT " + c_uuid
                         c.send(send.encode())
 
-                        log = str(c_uuid) + " bilgileri sözlüğe kaydedildi.\n"
+                        log = "Aracıda " str(c_uuid) + " bilgileri sözlüğe kaydedildi.\n"
                         self.logq.put(log)
 
                     c.send('\nThank you for connecting!\n'.encode())
@@ -184,7 +184,7 @@ def write_dictionary(server_dict, logq):
         if len(listedline) > 1:
             server_dict[listedline[0].strip()] = listedline[1].strip()
 
-    log = " Sözlük dosyasındaki kayıt sunucu sözlüğüne çekildi.\n"
+    log = "Aracı tarafından sözlük dosyasındaki kayıt sunucu sözlüğüne çekildi.\n"
     logq.put(log)
 
     fid.close()
@@ -195,7 +195,7 @@ def append_dictionary(data, logq):
     f = open("dictionary.txt", "a+")
     f.write("%s" % data)
 
-    log = " Yeni kayıt sözlük dosyasına yazıldı.\n"
+    log = "Aracı tarafından yeni kayıt sözlük dosyasına yazıldı.\n"
     logq.put(log)
 
     f.close()
