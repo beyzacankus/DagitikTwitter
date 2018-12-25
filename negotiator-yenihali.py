@@ -4,17 +4,8 @@ import socket
 import time
 import uuid
 
-
-class loggerThread(threading.Thread):
-    def __init__(self, logq):
-        threading.Thread.__init__(self)
-        self.logq = logq
-
-    def run(self):
-        while True:
-            data = self.logq.get()
-            print(data)
-
+from loggerThread import loggerThread
+logq = queue.Queue
 
 #  Bir peer icin hem client hem de server var.
 
@@ -30,6 +21,9 @@ class clientThread(threading.Thread):
 
     def run(self):
         s = socket.socket()
+
+        log = "Client çalışmaya başladı.\n"
+        self.logq.put(log)
 
         # Mesajları soketin diğer ucuna yollamak için sender Thread oluşturuluyor
         sender = clientSender(self.logq, self.clientq, s)
@@ -50,6 +44,9 @@ class clientThread(threading.Thread):
                 # Alınan port ve input bilgileri ile bağlantı kuruluyor
                 s.connect((host, port))
                 type = "A"
+
+                log = "IP: "+ str(host) + " Port: " + str(port) + " ile bağlantı kuruldu.\n"
+                self.logq.put(log)
 
                 # Client oluşturulduğu zaman atanan UUID ve tip bilgileri de eklenip HELO mesajı
                 # tüm parametreler ile yollanıyor. HELO mesajına kendi ip ve portu koyuluyor,
@@ -73,6 +70,9 @@ class clientSender(threading.Thread):
         self.s = s
 
     def run(self):
+        log = "Client Sender Thread çalışmaya başladı.\n"
+        self.logq.put(log)
+
         while True:
             # Client queue'den alınanlar servera yollanıyor
             while not self.clientq.empty():
@@ -90,9 +90,12 @@ class serverThread(threading.Thread):
         self.dict = dict
 
     def run(self):
+        log = "Server Thread çalışmaya başladı.\n"
+        self.logq.put(log)
+
         while True:
             c, addr = self.soket.accept()
-            log = "Got connection from " + str(addr)
+            log = "Şu adresle bağlantı sağlandı: " + str(addr)
             self.logq.put(log)
 
             # Kullanıcı kayıt olup olmadığı flag ile tutuluyor
@@ -116,6 +119,10 @@ class serverThread(threading.Thread):
                         append_dictionary(data)
                         send = "WAIT " + c_uuid
                         c.send(send.encode())
+
+                        log = str(c_uuid) + " bilgileri sözlüğe kaydedildi.\n"
+                        self.logq.put(log)
+
                     c.send('\nThank you for connecting!\n'.encode())
 
                 # Dictionary'deki kayıtlar yollanıyor
@@ -178,6 +185,10 @@ def write_dictionary(server_dict):
         listedline = line.strip().split('-')
         if len(listedline) > 1:
             server_dict[listedline[0].strip()] = listedline[1].strip()
+
+    log = " Sözlük dosyasındaki kayıt sunucu sözlüğüne çekildi.\n"
+    logq.put(log)
+
     fid.close()
 
 
@@ -185,6 +196,10 @@ def write_dictionary(server_dict):
 def append_dictionary(data):
     f = open("dictionary.txt", "a+")
     f.write("%s" % data)
+
+    log = " Yeni kayıt sözlük dosyasına yazıldı.\n"
+    logq.put(log)
+
     f.close()
 
 
