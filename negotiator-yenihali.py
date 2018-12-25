@@ -119,7 +119,7 @@ class serverThread(threading.Thread):
                         send = "WAIT " + c_uuid
                         c.send(send.encode())
 
-                        log = "Aracıda " str(c_uuid) + " bilgileri sözlüğe kaydedildi.\n"
+                        log = "Aracıda " + str(c_uuid) + " bilgileri sözlüğe kaydedildi.\n"
                         self.logq.put(log)
 
                     c.send('\nThank you for connecting!\n'.encode())
