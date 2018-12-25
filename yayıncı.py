@@ -8,17 +8,7 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 from Crypto import Random
 
-
-class loggerThread(threading.Thread):
-    def __init__(self, logq):
-        threading.Thread.__init__(self)
-        self.logq = logq
-
-    def run(self):
-        while True:
-            data = self.logq.get()
-            print(data)
-
+from loggerThread import loggerThread
 
 #  Bir peer icin hem client hem de server var.
 
@@ -37,6 +27,9 @@ class clientThread(threading.Thread):
     def run(self):
         s = socket.socket()
 
+        log = "Yayıncı Client çalışmaya başladı.\n"
+        self.logq.put(log)
+        
         # Mesajları soketin diğer ucuna yollamak için sender Thread oluşturuluyor
         sender = clientSender(self.logq, self.clientq, s)
         sender.start()
@@ -59,6 +52,9 @@ class clientThread(threading.Thread):
                 s.connect((host, port))
                 type = "Y"
 
+                log = "Yayıncıdan IP: "+ str(host) + " Port: " + str(port) + " ile bağlantı kuruldu.\n"
+                self.logq.put(log)
+                
                 # Client oluşturulduğu zaman atanan UUID ve tip bilgileri de eklenip HELO mesajı
                 # tüm parametreler ile yollanıyor.
                 data = inp[:4] + " " + str(self.c_uuid) + " " + str(self.ip) + " " + str(self.port) + " " + type + " " + nick
@@ -90,6 +86,10 @@ class clientSender(threading.Thread):
         self.s = s
 
     def run(self):
+        
+        log = "Yayıncı Client Sender Thread çalışmaya başladı.\n"
+        self.logq.put(log)
+        
         while True:
             # Client queue'den alınanlar servera yollanıyor
             while not self.clientq.empty():
@@ -114,10 +114,15 @@ class serverThread(threading.Thread):
         self.private_key = private_key
 
     def run(self):
+        log = "Yayıncı Server Thread çalışmaya başladı.\n"
+        self.logq.put(log)
+        
         while True:
             c, addr = self.soket.accept()
-            log = "Got connection from " + str(addr)
+            
+            log = "Yayıncı şu adresle bağlantı sağlandı: " + str(addr)
             self.logq.put(log)
+            
             # Kullanıcı kayıt olup olmadığı flag ile tutuluyor
             flag = 0
             c_uuid = ""
@@ -148,7 +153,7 @@ class serverThread(threading.Thread):
                     else:
                         self.dict[c_uuid] = rps[20:len(rps)]
                         data = c_uuid + " -" + rps[19:len(rps)]
-                        append_dictionary(data)
+                        append_dictionary(data, self.logq)
                         send = "WAIT " + c_uuid
                         c.send(send.encode())
                     c.send('\nThank you for connecting!'.encode())
@@ -189,6 +194,9 @@ class serverThread(threading.Thread):
 
 
 def main():
+    logQueue = queue.Queue()
+    logger_thread = loggerThread(logQueue)
+    logger_thread.start()
 
     # Server için soket bağlantıları
     s1 = socket.socket()
@@ -203,7 +211,7 @@ def main():
     # Kullanıcı kayıtlarının tutulacağı dictionary
     # write_dictionary ile text dosyası çağırılıp önceki kayıtlar dictionary içerisine yazılıyor
     server_dict = {}
-    write_dictionary(server_dict)
+    write_dictionary(server_dict, logQueue)
 
     # Public ve private keyler
     random_generator = Random.new().read
@@ -214,7 +222,6 @@ def main():
     # MAC adresiyle UUID
     client_uuid = uuid.getnode()
 
-    logQueue = queue.Queue()
     ServerQueue = queue.Queue()
     ClientQueue = queue.Queue()
 
@@ -222,24 +229,29 @@ def main():
     server_thread.start()
     client_thread = clientThread(ClientQueue, logQueue,  ip, port, client_uuid, public_key, private_key)
     client_thread.start()
-    logger_thread = loggerThread(logQueue)
-    logger_thread.start()
 
 
 # text dosyasındaki kayıtlar dictionary'e yazılıyor.UUID key değeri, geri kalan bilgiler(ip,port,tip,nick) valuelar
-def write_dictionary(server_dict):
+def write_dictionary(server_dict, logq):
     fid = open("dictionary.txt", "r+")
     for line in fid:
         listedline = line.strip().split('-')
         if len(listedline) > 1:
             server_dict[listedline[0].strip()] = listedline[1].strip()
+            
+    log = "Yayıncı tarafından sözlük dosyasındaki kayıt sunucu sözlüğüne çekildi.\n"
+    logq.put(log)        
     fid.close()
 
 
 # yeni kaydı text dosyasına ekleme
-def append_dictionary(data):
+def append_dictionary(data, logq):
     f = open("dictionary.txt", "a+")
     f.write("%s" % data)
+    
+    log = "Yayıncı tarafından yeni kayıt sözlük dosyasına yazıldı.\n"
+    logq.put(log)
+    
     f.close()
 
 
