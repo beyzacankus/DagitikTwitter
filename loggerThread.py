@@ -23,6 +23,6 @@ class loggerThread(threading.Thread):
                 else:
                     log = str(time.ctime(time.time())) + " - " + str(msg) + "\n"
                 file.write(log)
-
+		file.flush()
         file.write("Logger exiting.\n")
         file.close()
