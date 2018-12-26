@@ -64,12 +64,16 @@ def writeToPeerDictionary(peer_dict, logq, type):
     fid.close()
 
 
-# Yeni kaydi peer_dictionary dosyasina ekleme
-def appendToPeerDictionary(data, logq):
-    f = open("dictionary.txt", "a+")
-    f.write("%s" % data)
+# Yeni eklenen peer bilgileri ilgili dosyalara kaydediliyor.
+# Araci ve yayinci için kullanilan dosya adlari karisikliklari onlemek icin farkli belirlenmistir.
+def appendToPeerDictionary(data, logq, type):
+    if (type == "araci"):
+        fid = open("araci_peer_dictionary.txt", "a+")
+        log = "Aracı tarafından yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n"
+    else:
+        fid = open("yayinci_peer_dictionary.txt", "a+")
+        log = "Yayıncı tarafından yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n"
 
-    log = "Yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n"
+    fid.write("%s" % data)
     logq.put(log)
-
-    f.close()
+    fid.close()

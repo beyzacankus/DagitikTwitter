@@ -155,7 +155,7 @@ class serverThread(threading.Thread):
                     else:
                         self.dict[c_uuid] = rps[20:len(rps)]
                         data = c_uuid + " -" + rps[19:len(rps)]
-                        appendToPeerDictionary(data, self.logq)
+                        appendToPeerDictionary(data, self.logq, "yayinci")
                         send = "WAIT " + c_uuid
                         c.send(send.encode())
                     c.send('\nThank you for connecting!'.encode())

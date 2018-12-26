@@ -116,7 +116,7 @@ class serverThread(threading.Thread):
                     else:
                         self.peer_dict[c_uuid] = rps[20:len(rps)]
                         data = c_uuid + " -" + rps[19:len(rps)] + " NB"  # Sonradan ozellikle yayincilarda hangi kullanıcının engellendigini gormemizi saglayacak: NB (Engelli Degil) - B (Engelli)
-                        appendToPeerDictionary(data, self.logq)
+                        appendToPeerDictionary(data, self.logq, "araci")
                         send = "WAIT " + c_uuid
                         c.send(send.encode())
 
