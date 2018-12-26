@@ -22,8 +22,8 @@ aboneliktenciktin = "UNSO"
 
 
 #types, parser fonksiyonunu çağıran aracı mı ? yayıncı mı ? bunu bilmemiz gerekiyor.
-araci = "araci"
-yayinci = "yayinci"
+araci = "A"
+yayinci = "Y"
 
 
 def parser(data, type): #AUTH ve BLCK hataları ana kod içerisinde yazılacak
