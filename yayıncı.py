@@ -4,11 +4,13 @@ import socket
 import time
 import uuid
 import chardet
+
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 from Crypto import Random
 
 from loggerThread import loggerThread
+from util_functions import *
 
 #  Bir peer icin hem client hem de server var.
 
@@ -153,7 +155,7 @@ class serverThread(threading.Thread):
                     else:
                         self.dict[c_uuid] = rps[20:len(rps)]
                         data = c_uuid + " -" + rps[19:len(rps)]
-                        append_dictionary(data, self.logq)
+                        appendToPeerDictionary(data, self.logq)
                         send = "WAIT " + c_uuid
                         c.send(send.encode())
                     c.send('\nThank you for connecting!'.encode())
@@ -229,30 +231,6 @@ def main():
     server_thread.start()
     client_thread = clientThread(ClientQueue, logQueue,  ip, port, client_uuid, public_key, private_key)
     client_thread.start()
-
-
-# text dosyasındaki kayıtlar dictionary'e yazılıyor.UUID key değeri, geri kalan bilgiler(ip,port,tip,nick) valuelar
-def write_dictionary(server_dict, logq):
-    fid = open("dictionary.txt", "r+")
-    for line in fid:
-        listedline = line.strip().split('-')
-        if len(listedline) > 1:
-            server_dict[listedline[0].strip()] = listedline[1].strip()
-            
-    log = "Yayıncı tarafından sözlük dosyasındaki kayıt sunucu sözlüğüne çekildi.\n"
-    logq.put(log)        
-    fid.close()
-
-
-# yeni kaydı text dosyasına ekleme
-def append_dictionary(data, logq):
-    f = open("dictionary.txt", "a+")
-    f.write("%s" % data)
-    
-    log = "Yayıncı tarafından yeni kayıt sözlük dosyasına yazıldı.\n"
-    logq.put(log)
-    
-    f.close()
 
 
 # HELO mesajıyla alınan input ip,port ve nick parametrelerine ayrıştırılıyor
