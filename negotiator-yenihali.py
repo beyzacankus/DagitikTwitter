@@ -6,6 +6,7 @@ import uuid
 
 from loggerThread import loggerThread
 from util_functions import *
+from protokol import *
 
 #  Bir peer icin hem client hem de server var.
 
@@ -24,41 +25,60 @@ class clientThread(threading.Thread):
 
         log = "Aracı client çalışmaya başladı.\n"
         self.logq.put(log)
-
-        # Mesajları soketin diğer ucuna yollamak için sender Thread oluşturuluyor
-        sender = clientSender(self.logq, self.clientq, s)
-        sender.start()
-
+        # -------------------------------------Eksiklikler var
         while True:
-            inp = input()
-            inp = inp.strip("\n")
+            peer_dict = {}
+            writeToPeerDictionary(peer_dict, self.logq, "araci")
 
-            if inp[:4] == "HELO":
+            for c_uuid in peer_dict.items():
+                # Kullaniciya ait bilgiler ayristiriliyor
+                ip, port, type, nick = split_HELO_parametres(peer_dict[c_uuid])
+                # Kullaniciyla baglanti baslatiliyor
+                port = int(port)
+                s.connect((ip, port))
 
-                # Mesajla gelen parametreler parse_input metoduyla ayrıştırılıyor
-                # Buradaki ip ve port bağlanılan server'ın ipleri
-                server_ip, server_port, nick = parse_input(inp)
-                host = server_ip
-                port = int(server_port)
-
-                # Alınan port ve input bilgileri ile bağlantı kuruluyor
-                s.connect((host, port))
-                type = "A"
-
-                log = "Aracıdan IP: "+ str(host) + " Port: " + str(port) + " ile bağlantı kuruldu.\n"
+                log = "Aracıdan IP: " + str(ip) + " Port: " + str(port) + " ile bağlantı kuruldu.\n"
                 self.logq.put(log)
 
-                # Client oluşturulduğu zaman atanan UUID ve tip bilgileri de eklenip HELO mesajı
-                # tüm parametreler ile yollanıyor. HELO mesajına kendi ip ve portu koyuluyor,
-                # çünkü karşı tarafın listesine kendi ip ve portunu vermek zorunda. 
-                data = inp[:4] + " " + str(self.c_uuid) + " " + self.ip + " " + str(self.port) + " " + type + " " + nick
-                self.clientq.put(data)
+                msg = "HELO " + self.c_uuid + self.ip + "12345" + "A" + ""      # -------------- Burada araci kendi ipsini ve server taradinin portunu yolluyor. Nick de aracida onemli olmadigi icin bos.
+                self.clientq.put(msg)
 
-            else:
-                self.clientq.put(inp)
+            time.sleep(60)
 
-            time.sleep(1)
-            print(s.recv(1024).decode())
+        # # Mesajları soketin diğer ucuna yollamak için sender Thread oluşturuluyor
+        # sender = clientSender(self.logq, self.clientq, s)
+        # sender.start()
+        #
+        # while True:
+        #     inp = input()
+        #     inp = inp.strip("\n")
+        #
+        #     if inp[:4] == "HELO":
+        #
+        #         # Mesajla gelen parametreler parse_input metoduyla ayrıştırılıyor
+        #         # Buradaki ip ve port bağlanılan server'ın ipleri
+        #         server_ip, server_port, nick = parse_input(inp)
+        #         host = server_ip
+        #         port = int(server_port)
+        #
+        #         # Alınan port ve input bilgileri ile bağlantı kuruluyor
+        #         s.connect((host, port))
+        #         type = "A"
+        #
+        #         log = "Aracıdan IP: "+ str(host) + " Port: " + str(port) + " ile bağlantı kuruldu.\n"
+        #         self.logq.put(log)
+        #
+        #         # Client oluşturulduğu zaman atanan UUID ve tip bilgileri de eklenip HELO mesajı
+        #         # tüm parametreler ile yollanıyor. HELO mesajına kendi ip ve portu koyuluyor,
+        #         # çünkü karşı tarafın listesine kendi ip ve portunu vermek zorunda.
+        #         data = inp[:4] + " " + str(self.c_uuid) + " " + self.ip + " " + str(self.port) + " " + type + " " + nick
+        #         self.clientq.put(data)
+        #
+        #     else:
+        #         self.clientq.put(inp)
+        #
+        #     time.sleep(1)
+        #     print(s.recv(1024).decode())
 
         
 # Client için sender thread
@@ -179,20 +199,7 @@ def main():
 
 
 
-# HELO mesajıyla alınan input ip,port ve nick parametrelerine ayrıştırılıyor
-def parse_input(inp):
-    inp = str(inp)
-    nick = ""
-    ip = ""
-    port = ""
-    delimiter = " "
-    list = inp.split(delimiter)
-    ip = list[0]
-    port = list[1]
-    type = list[2]
-    nick = list[3]
 
-    return ip, port, nick
 
 
 if __name__ == '__main__':
