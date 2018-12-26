@@ -6,6 +6,11 @@ import queue
 import socket
 import time
 import uuid
+from itertools import islice
+
+def take(n, iterable):
+    "Return first n items of the iterable as a list"
+    return list(islice(iterable, n))
 
 def create_rsa_key(uuid) :
     random_generator = Random.new().read
