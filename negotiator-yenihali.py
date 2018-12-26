@@ -162,7 +162,7 @@ def main():
     # Kullanıcı kayıtlarının tutulacağı dictionary
     # write_dictionary ile text dosyası çağırılıp önceki kayıtlar dictionary içerisine yazılıyor
     server_dict = {}
-    writeToPeerDictionary(server_dict, logQueue)
+    writeToPeerDictionary(server_dict, logQueue, "araci")
 
     # MAC adresiyle UUID
     client_uuid = uuid.getnode()

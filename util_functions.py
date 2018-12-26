@@ -45,15 +45,21 @@ def check_signature(message, signature, sender_public_key) :
 
 
 
-# peer_dictionary dosyasındaki kayitlar peer_dict'e yazılıyor. UUID key degeri, geri kalan bilgiler(ip,port,tip,nick) valuelar
-def writeToPeerDictionary(peer_dict, logq):
-    fid = open("dictionary.txt", "r+")
+# Peer bilgileri ilgili dosyalardan okunuyor ve bir dictionary'e kaydediliyor.
+# Araci ve yayinci için kullanilan dosya adlari karisikliklari onlemek icin farkli belirlenmistir.
+def writeToPeerDictionary(peer_dict, logq, type):
+    if(type == "araci"):
+        fid = open("araci_peer_dictionary.txt", "r+")
+        log = "Aracı dosyadan kayıtları çekti.\n"
+    else:
+        fid = open("yayinci_peer_dictionary.txt", "r+")
+        log = "Yayıncı dosyadan kayıtları çekti.\n"
+
     for line in fid:
         listedline = line.strip().split('-')
         if len(listedline) > 1:
             peer_dict[listedline[0].strip()] = listedline[1].strip()
 
-    log = "Dosyadan kayıtlar çekildi.\n"
     logq.put(log)
     fid.close()
 

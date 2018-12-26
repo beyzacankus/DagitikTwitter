@@ -213,7 +213,7 @@ def main():
     # Kullanıcı kayıtlarının tutulacağı dictionary
     peer_dict = {}
     # writeToPeerDictionary ile text dosyası çağırılıp önceki kayıtlar dictionary içerisine yazılıyor
-    writeToPeerDictionary(peer_dict, logQueue)
+    writeToPeerDictionary(peer_dict, logQueue, "yayinci")
 
     # Public ve private keyler
     random_generator = Random.new().read
