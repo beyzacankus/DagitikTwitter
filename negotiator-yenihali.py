@@ -115,7 +115,7 @@ class serverThread(threading.Thread):
                     # Kayıtlı değilse yeni kayıt oluşturup WAIT cevabı veriliyor
                     else:
                         self.peer_dict[c_uuid] = rps[20:len(rps)]
-                        data = c_uuid + " -" + rps[19:len(rps)] + " NB"  # Sonradan ozellikle yayincilarda hangi kullanıcının engellendigini gormemizi saglayacak: NB (Engelli Degil) - B (Engelli)
+                        data = c_uuid + " -" + rps[19:len(rps)]
                         appendToPeerDictionary(data, self.logq, "araci")
                         send = "WAIT " + c_uuid
                         c.send(send.encode())
@@ -185,14 +185,12 @@ def parse_input(inp):
     nick = ""
     ip = ""
     port = ""
-    bann = ""
     delimiter = " "
     list = inp.split(delimiter)
     ip = list[0]
     port = list[1]
     type = list[2]
     nick = list[3]
-    bann = list[4]
 
     return ip, port, nick
 
