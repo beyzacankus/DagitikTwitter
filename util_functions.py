@@ -53,9 +53,8 @@ def writeToPeerDictionary(peer_dict, logq):
         if len(listedline) > 1:
             peer_dict[listedline[0].strip()] = listedline[1].strip()
 
-    log = "Aracı tarafından sözlük dosyasındaki kayıt sunucu sözlüğüne çekildi.\n"
+    log = "Dosyadan kayıtlar çekildi.\n"
     logq.put(log)
-
     fid.close()
 
 
@@ -64,7 +63,7 @@ def appendToPeerDictionary(data, logq):
     f = open("dictionary.txt", "a+")
     f.write("%s" % data)
 
-    log = "Aracı tarafından yeni kayıt sözlük dosyasına yazıldı.\n"
+    log = "Yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n"
     logq.put(log)
 
     f.close()
