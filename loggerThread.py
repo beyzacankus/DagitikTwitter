@@ -13,6 +13,7 @@ class loggerThread(threading.Thread):
     def run(self):
         exitFlag = False
         file = open("log.txt", 'a')
+        file.write("-----------------------------------\n")
         file.write("Logger starting.\n")
         while not exitFlag:
             if not self.logQueue.empty():
@@ -23,6 +24,6 @@ class loggerThread(threading.Thread):
                 else:
                     log = str(time.ctime(time.time())) + " - " + str(msg) + "\n"
                 file.write(log)
-		file.flush()
+        file.flush()
         file.write("Logger exiting.\n")
         file.close()
