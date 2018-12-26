@@ -209,9 +209,9 @@ def main():
     port = 12345
 
     # Kullanıcı kayıtlarının tutulacağı dictionary
-    # write_dictionary ile text dosyası çağırılıp önceki kayıtlar dictionary içerisine yazılıyor
-    server_dict = {}
-    write_dictionary(server_dict, logQueue)
+    peer_dict = {}
+    # writeToPeerDictionary ile text dosyası çağırılıp önceki kayıtlar dictionary içerisine yazılıyor
+    writeToPeerDictionary(peer_dict, logQueue)
 
     # Public ve private keyler
     random_generator = Random.new().read
@@ -225,7 +225,7 @@ def main():
     ServerQueue = queue.Queue()
     ClientQueue = queue.Queue()
 
-    server_thread = serverThread(ServerQueue, logQueue, s1, server_dict, public_key, private_key)
+    server_thread = serverThread(ServerQueue, logQueue, s1, peer_dict, public_key, private_key)
     server_thread.start()
     client_thread = clientThread(ClientQueue, logQueue,  ip, port, client_uuid, public_key, private_key)
     client_thread.start()

@@ -47,7 +47,7 @@ def check_signature(message, signature, sender_public_key) :
 
 # peer_dictionary dosyasındaki kayitlar peer_dict'e yazılıyor. UUID key degeri, geri kalan bilgiler(ip,port,tip,nick) valuelar
 def writeToPeerDictionary(peer_dict, logq):
-    fid = open("peer_dictionary.txt", "r+")
+    fid = open("dictionary.txt", "r+")
     for line in fid:
         listedline = line.strip().split('-')
         if len(listedline) > 1:
