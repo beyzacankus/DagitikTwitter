@@ -4,6 +4,7 @@ import negotiator
 import yayıncı
 import util_functions
 import protokol
+import loggerThread
 
 from ui.dagitik_twitter_ui import Ui_MainWindow
 
@@ -21,10 +22,16 @@ class Test_Ui(QtWidgets.QMainWindow):
         self.ui.pushButton_2.pressed.connect(self.log_out)
         self.ui.pushButton_3.pressed.connect(self.unsubscribe)
         self.ui.pushButton_6.pressed.connect(self.block_user)
-
+        self.ui.pushButton_4.pressed.connect(self.unblock_user)
+        self.ui.pushButton_7.pressed.connect(self.subscribe)
+        self.ui.pushButton_9.pressed.connect(self.send_message)
+        self.ui.pushButton_5.pressed.connect(self.share_context)
+        self.ui.pushButton_8.pressed.connect(self.refresh_feed)
     def connect_to_twitter(self):
         # girilen nickname ' i al
         user_nickname = self.ui.plainTextEdit.toPlainText()
+
+
 
         # Yayıncı peer oluştur
 
@@ -48,6 +55,8 @@ class Test_Ui(QtWidgets.QMainWindow):
 
         # Profile:name yazılacak
 
+
+
     def log_out(self):
         # tüm edit alanları silinecek
         pass
@@ -70,6 +79,20 @@ class Test_Ui(QtWidgets.QMainWindow):
 
         pass
 
+    def unblock_user(self):
+        pass
+
+    def subscribe(self):
+        pass
+
+    def share_context(self):
+        pass
+
+    def send_message(self):
+        pass
+
+    def refresh_feed(self):
+        pass
 
     def run(self):
         self.show()
