@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import sys
+from loggerThread import loggerThread
+from util_functions import *
 
 merhaba = "HELO"
 hosgeldin = "WLCM"
@@ -59,6 +61,12 @@ def parser(data, type): #AUTH ve BLCK hataları ana kod içerisinde yazılacak
                 "cmd": suid,
                 "resp": auid
             }
+        elif(command == auid): #suid argüman almaz ancak auid dönüş yaparken uuid parametresi ile döner.
+            rdict = {
+                "status": "OK",
+                "cmd": auid,
+                "uuid": splitLine[1].strip()
+            }
 
         elif(command == list): #liste ve count dönüyoruz.
             rdict = {
@@ -80,6 +88,18 @@ def parser(data, type): #AUTH ve BLCK hataları ana kod içerisinde yazılacak
                 rdict = {
                     "status" : "NOK",
                     "cmd": pubkeygeldi
+                }
+        elif(command == pubkeygitsin): #cpubkey ile gelen pubkey i alıyoruz. gönderim yaparken kendi pubkey imizi göndereceğiz.
+            if(type == yayinci):
+                rdict = {
+                    "status" : "OK",
+                    "cmd": pubkeygitsin,
+                    "spubkey": splitLine[1].strip()
+                }
+            else:
+                rdict = {
+                    "status" : "NOK",
+                    "cmd": pubkeygitsin
                 }
 
         elif(command == pubkeycontrol): #signed ve text in doğruluğunu kontrol edip resp1 veya resp2 döneceğiz
@@ -200,3 +220,77 @@ def parser(data, type): #AUTH ve BLCK hataları ana kod içerisinde yazılacak
         }
 
     return rdict
+
+def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueue, clientreaderqueue, public_key, r_pub_key):
+
+    data_dict = parser(data,type)
+
+    if(data_dict['status'] == "OK"):
+        if(data_dict['cmd'] == merhaba):
+            if(data_dict['cuuid'] in user_dict):
+                data = data_dict['resp2'] + " " + data_dict['cuuid']
+            else: #WAIT burada göndereliyor ancak ekleme yapmak için client threadinin SUID kontrolünün sonucunu beklemek gerekiyor.
+                clientsenderqueue.put("SUID")
+                while not clientreaderqueue.empty():
+                    reader_data = clientreaderqueue.get() ##devamı gelecek.
+                    if(reader_data['uuid'] == data_dict['cuuid']):#client reader queue dict yazılmış gibi değerlendirildi.
+                        c_dict = {
+                            "cip": data_dict['cip'],
+                            "cport": data_dict['cport'],
+                            "ctype": data_dict["ctype"],
+                            "cnick": data_dict["cnick"]
+                        }
+                        user_dict[data_dict['cuuid']] = c_dict
+                        line = data_dict['cuuid'] + " -" + c_dict
+                        appendToPeerDictionary(line, logq, "yayinci")
+                        data = data_dict['resp1'] + " " + data_dict['cuuid']
+                        flag = 1
+                    else:
+                        break
+            data += "\nThank you for connecting!"
+
+        elif(data_dict['cmd'] == list):
+
+            if flag == 1:
+                if(data_dict['count'] > 0): #sıfırdan büyük olması durumunda count kadar kayıt liste olarak döner
+                    data = data_dict['resp'] + " " + str(take(data_dict['count'], user_dict.items()))
+                else:
+                    data = data_dict['resp'] + " " + str(user_dict)
+            else:
+                data = "AUTH"
+
+        elif (data_dict['cmd'] == suid):
+
+            data = data_dict['resp'] + " " + suuid
+
+        elif(data_dict['cmd'] == pubkeygeldi):
+            if flag == 1:
+                r_pub_key = data_dict['cpubkey']
+                data = data_dict['resp'] + " " + public_key.exportKey("PEM").decode()
+            else:
+                data = "AUTH"
+
+    else:
+        logq.put(data_dict)
+
+    return data
+
+def out_parser_client(data, type, clientsenderqueue):
+
+    return 1
+def inc_parser_client(data, type, clientreaderqueue):
+
+    data_dict = parser(data, type)
+    if (data_dict['status'] == "OK"):
+        if (data_dict['cmd'] == auid):
+            clientreaderqueue.put(data_dict)
+        elif(data_dict['cmd'] == pubkeygitsin):
+            clientreaderqueue.put(data_dict)
+
+    return 1
+
+
+
+
+
+
