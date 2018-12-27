@@ -12,9 +12,10 @@ from protokol import *
 
 #  Peer'in client tarafi tanimlaniyor.
 class clientThread(threading.Thread):
-    def __init__(self, clientq, logq, ip, port, c_uuid):
+    def __init__(self, clientSenderQueue, clientReaderQueue, logq, ip, port, c_uuid):
         threading.Thread.__init__(self)
-        self.clientq = clientq
+        self.clientReaderQueue = clientReaderQueue
+        self.clientSenderQueue = clientSenderQueue
         self.logq = logq
         self.ip = ip
         self.port = port
@@ -27,66 +28,40 @@ class clientThread(threading.Thread):
         self.logq.put(log)
         # -------------------------------------Eksiklikler var
         while True:
+            my_dict = {
+                "ip": self.ip,
+                "server_port": "12345",  # server portu
+                "c_uuid": self.c_uuid
+            }
+
             peer_dict = {}
             writeToPeerDictionary(peer_dict, self.logq, "araci")
 
-            for c_uuid in peer_dict.items():
-                # Kullaniciya ait bilgiler ayristiriliyor
-                ip, port, type, nick = split_HELO_parametres(peer_dict[c_uuid])
-                # Kullaniciyla baglanti baslatiliyor
-                port = int(port)
-                s.connect((ip, port))
+            while True:
+                for c_uuid in peer_dict.items():
+                    # Kullaniciya ait bilgiler ayristiriliyor
+                    ip, port, type, nick = split_HELO_parametres(peer_dict[c_uuid])
+                    # Kullaniciyla baglanti baslatiliyor
+                    port = int(port)
+                    s.connect((ip, port))
 
-                log = "Aracıdan IP: " + str(ip) + " Port: " + str(port) + " ile bağlantı kuruldu.\n"
-                self.logq.put(log)
+                    senderThread = clientSender(self.logq, self.clientSenderQueue, s)
+                    senderThread.start()
 
-                msg = "HELO " + self.c_uuid + self.ip + "12345" + "A" + ""      # -------------- Burada araci kendi ipsini ve server taradinin portunu yolluyor. Nick de aracida onemli olmadigi icin bos.
-                self.clientq.put(msg)
+                    log = "Aracıdan IP: " + str(ip) + " Port: " + str(port) + " ile bağlantı kuruldu.\n"
+                    self.logq.put(log)
 
-            time.sleep(60)
+                    msg = "HELO " + self.c_uuid + self.ip + "12345" + "A" + ""  # Burada araci kendi ipsini ve server taradinin portunu yolluyor. Nick de aracida onemli olmadigi icin bos.
+                    self.clientSenderQueue.put(msg)
+                time.sleep(60)
 
-        # # Mesajları soketin diğer ucuna yollamak için sender Thread oluşturuluyor
-        # sender = clientSender(self.logq, self.clientq, s)
-        # sender.start()
-        #
-        # while True:
-        #     inp = input()
-        #     inp = inp.strip("\n")
-        #
-        #     if inp[:4] == "HELO":
-        #
-        #         # Mesajla gelen parametreler parse_input metoduyla ayrıştırılıyor
-        #         # Buradaki ip ve port bağlanılan server'ın ipleri
-        #         server_ip, server_port, nick = parse_input(inp)
-        #         host = server_ip
-        #         port = int(server_port)
-        #
-        #         # Alınan port ve input bilgileri ile bağlantı kuruluyor
-        #         s.connect((host, port))
-        #         type = "A"
-        #
-        #         log = "Aracıdan IP: "+ str(host) + " Port: " + str(port) + " ile bağlantı kuruldu.\n"
-        #         self.logq.put(log)
-        #
-        #         # Client oluşturulduğu zaman atanan UUID ve tip bilgileri de eklenip HELO mesajı
-        #         # tüm parametreler ile yollanıyor. HELO mesajına kendi ip ve portu koyuluyor,
-        #         # çünkü karşı tarafın listesine kendi ip ve portunu vermek zorunda.
-        #         data = inp[:4] + " " + str(self.c_uuid) + " " + self.ip + " " + str(self.port) + " " + type + " " + nick
-        #         self.clientq.put(data)
-        #
-        #     else:
-        #         self.clientq.put(inp)
-        #
-        #     time.sleep(1)
-        #     print(s.recv(1024).decode())
 
-        
 # Client için sender thread
 class clientSender(threading.Thread):
-    def __init__(self, logq, clientq, s):
+    def __init__(self, logq, clientSenderQueue, s):
         threading.Thread.__init__(self)
         self.logq = logq
-        self.clientq = clientq
+        self.clientSenderQueue = clientSenderQueue
         self.s = s
 
     def run(self):
@@ -95,9 +70,24 @@ class clientSender(threading.Thread):
 
         while True:
             # Client queue'den alınanlar servera yollanıyor
-            while not self.clientq.empty():
-                data = self.clientq.get()
+            while not self.clientSenderQueue.empty():
+                data = self.clientSenderQueue.get()
                 self.s.send(data.encode())
+
+class clientReader(threading.Thread):
+    def __init__(self, logq, clientReaderQueue, s):
+        threading.Thread.__init__(self)
+        self.logq = logq
+        self.clientReaderQueue = clientReaderQueue
+        self.s = s
+
+    def run(self):
+        log = "Aracı Client Reader Thread çalışmaya başladı.\n"
+        self.logq.put(log)
+
+        while True:
+            msg = self.s.recv(1024).decode()
+            x = inc_parser_client(msg, "A", self.clientReaderQueue)
 
 
 # Server için thread
@@ -188,15 +178,13 @@ def main():
     client_uuid = uuid.getnode()
 
     ServerQueue = queue.Queue()
-    ClientQueue = queue.Queue()
+    clientSenderQueue = queue.Queue()
+    clientReaderQueue = queue.Queue()
 
     server_thread = serverThread(ServerQueue, logQueue, s1, server_dict)
     server_thread.start()
-    client_thread = clientThread(ClientQueue, logQueue, ip, port, client_uuid)
+    client_thread = clientThread(clientSenderQueue, clientReaderQueue, logQueue, ip, port, client_uuid)
     client_thread.start()
-
-
-
 
 
 
