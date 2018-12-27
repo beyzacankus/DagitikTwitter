@@ -38,23 +38,27 @@ class clientThread(threading.Thread):
             writeToPeerDictionary(peer_dict, self.logq, "araci")
 
             while True:
-                for c_uuid in peer_dict.items():
+                # peer_dict'te kayitli her kullanici ile iletisim baslatma
+                for key in peer_dict:
                     # Kullaniciya ait bilgiler ayristiriliyor
-                    ip, port, type, nick = split_HELO_parametres(peer_dict[c_uuid])
+                    ip, port, type, nick = split_HELO_parametres(peer_dict[key])
                     # Kullaniciyla baglanti baslatiliyor
                     port = int(port)
-                    s.connect((ip, port))
+                    try:
+                        s.connect((ip, port))
 
-                    senderThread = clientSender(self.logq, self.clientSenderQueue, s)
-                    senderThread.start()
-                    readerThread = clientReader(self.logq, self.clientReaderQueue, s)
-                    readerThread.start()
+                        senderThread = clientSender(self.logq, self.clientSenderQueue, s)
+                        senderThread.start()
+                        readerThread = clientReader(self.logq, self.clientReaderQueue, s)
+                        readerThread.start()
 
-                    log = "Aracıdan IP: " + str(ip) + " Port: " + str(port) + " ile bağlantı kuruldu.\n"
-                    self.logq.put(log)
+                        log = "Aracıdan IP: " + str(ip) + " Port: " + str(port) + " ile bağlantı kuruldu.\n"
+                        self.logq.put(log)
 
-                    msg = "HELO " + self.c_uuid + self.ip + "12345" + "A" + ""  # Burada araci kendi ipsini ve server taradinin portunu yolluyor. Nick de aracida onemli olmadigi icin bos.
-                    self.clientSenderQueue.put(msg)
+                        msg = "HELO " + str(self.c_uuid) + " " + str(self.ip) + " " + "12345" + " " + "A" + ""  # Burada araci kendi ipsini ve server taradinin portunu yolluyor. Nick de aracida onemli olmadigi icin bos.
+                        self.clientSenderQueue.put(msg)
+                    except ConnectionRefusedError:
+                        continue
                 time.sleep(60)
 
 

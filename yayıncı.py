@@ -214,14 +214,23 @@ def main():
     # writeToPeerDictionary ile text dosyası çağırılıp önceki kayıtlar dictionary içerisine yazılıyor
     writeToPeerDictionary(peer_dict, logQueue, "yayinci")
 
-    # Public ve private keyler
-    random_generator = Random.new().read
-    new_key = RSA.generate(2048, randfunc=random_generator)
-    public_key = new_key.publickey()
-    private_key = new_key
-
     # MAC adresiyle UUID
-    client_uuid = uuid.getnode()
+    client_uuid = str(uuid.getnode())
+
+    # Public ve private keyler
+    # Burada her şekilde yeni key oluşturuluyor ancak eğer daha önceden oluşmuş key var ise
+    # Write_Read_RSAKeys fonskiyonu tarafından okunup rsa_key dict ine yazılıyor.
+    keys = create_rsa_key(client_uuid)
+    private_key = client_uuid + "_private_key"
+    public_key = client_uuid + "_public_key"
+    private_key = keys[private_key].exportKey().decode()
+    public_key = keys[public_key].exportKey().decode()
+
+    rsa_keys = Write_Read_RSAKeys(public_key, private_key, logQueue)
+    private_key = rsa_keys['privKey']
+    public_key = rsa_keys['pubKey']
+
+    #--------------------------------------RSA KEYS
 
     ServerQueue = queue.Queue()
     ClientQueue = queue.Queue()
@@ -243,7 +252,7 @@ def parse_input(inp):
     list = inp.split(delimiter)
     ip = list[0]
     port = list[1]
-  #  type = list[2]
+#    type = list[2]
     nick = list[2]
  #   bann = list[4]
 
