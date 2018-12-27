@@ -266,10 +266,9 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
         elif(data_dict['cmd'] == pubkeygeldi):
             if flag == 1:
                 r_pub_key = data_dict['cpubkey']
-                data = data_dict['resp'] + " " + public_key.exportKey("PEM").decode()
+                data = data_dict['resp'] + " " + public_key
             else:
                 data = "AUTH"
-
     else:
         logq.put(data_dict)
 
