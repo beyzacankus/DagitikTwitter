@@ -92,6 +92,7 @@ def writeToPeerDictionary(peer_dict, logq, type):
         fid = open("yayinci_peer_dictionary.txt", "r+")
         log = "Yayıncı dosyadan kayıtları çekti.\n"
 
+    #uuid key'i ile geri kalan baglanti bilgilerini tutan peer_dict olusturur.
     for line in fid:
         listedline = line.strip().split('-')
         if len(listedline) > 1:

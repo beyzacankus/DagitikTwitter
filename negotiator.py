@@ -38,6 +38,7 @@ class clientThread(threading.Thread):
             writeToPeerDictionary(peer_dict, self.logq, "araci")
 
             while True:
+                # peer_dict'te kayitli her kullanici ile iletisim baslatma
                 for key in peer_dict:
                     # Kullaniciya ait bilgiler ayristiriliyor
                     ip, port, type, nick = split_HELO_parametres(peer_dict[key])
