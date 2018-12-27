@@ -59,7 +59,7 @@ def parser(data, type): #AUTH ve BLCK hataları ana kod içerisinde yazılacak
             rdict = {
                 "status": "OK",
                 "cmd": suid,
-                "resp": auid,
+                "resp": auid
             }
         elif(command == auid): #suid argüman almaz ancak auid dönüş yaparken uuid parametresi ile döner.
             rdict = {
@@ -221,7 +221,7 @@ def parser(data, type): #AUTH ve BLCK hataları ana kod içerisinde yazılacak
 
     return rdict
 
-def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueue, clientreaderqueue, public_key, r_pub_key, micro_blog):
+def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueue, clientreaderqueue, public_key, r_pub_key):
 
     data_dict = parser(data,type)
 
@@ -230,12 +230,7 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
             if(data_dict['cuuid'] in user_dict):
                 data = data_dict['resp2'] + " " + data_dict['cuuid']
             else: #WAIT burada göndereliyor ancak ekleme yapmak için client threadinin SUID kontrolünün sonucunu beklemek gerekiyor.
-                sender_dict = {
-                    "cmd":"SUID",
-                    "ip":data_dict['cip'],
-                    "port":data_dict['cport']
-                }
-                clientsenderqueue.put(sender_dict)
+                clientsenderqueue.put("SUID")
                 while not clientreaderqueue.empty():
                     reader_data = clientreaderqueue.get() ##devamı gelecek.
                     if(reader_data['uuid'] == data_dict['cuuid']):#client reader queue dict yazılmış gibi değerlendirildi.
@@ -268,53 +263,12 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
 
             data = data_dict['resp'] + " " + suuid
 
-        elif(data_dict['cmd'] == pubkeygeldi): #gelen public key r_pub_key değişkenine atanıyor.
+        elif(data_dict['cmd'] == pubkeygeldi):
             if flag == 1:
                 r_pub_key = data_dict['cpubkey']
                 data = data_dict['resp'] + " " + public_key.exportKey("PEM").decode()
             else:
                 data = "AUTH"
-        elif(data_dict['cmd'] == pubkeycontrol): #buraya public key hatalı olması durumunda çalışacak fonksiyonu eklemeliyiz
-            if flag == 1:
-                if(check_signature(data_dict['ctext'], data_dict['csigned'], r_pub_key)):
-                    data = data_dict['resp1']
-                else:
-                    data = data_dict['resp2']
-            else:
-                data = "AUTH"
-        elif(data_dict['cmd'] == microblogistek):
-            if flag == 1:
-                if(data_dict['count'] > 0): #sıfırdan büyük olması durumunda count kadar kayıt liste olarak döner
-                    data = data_dict['resp'] + " " + str(take(data_dict['count'], micro_blog.items()))
-                else:
-                    data = data_dict['resp'] + " " + str(micro_blog)
-            else:
-                data = "AUTH"
-        elif(data_dict['cmd'] == aboneol):
-            if flag == 1:
-                #abone olmayı sağlayan fonksiyon buraya gelecek.
-                #neye göre abone alacak bunu protokolde belirlemeyliyiz
-                data = data_dict['resp']
-
-            else:
-                data = "AUTH"
-        elif(data_dict['cmd'] == aboneliktencik):
-            if flag == 1:
-                #abonelikten çıkmayı sağlayan fonksiyon buraya gelecek.
-                #neye göre abonelikten çıkacak bunu protkolde belirlemeliyiz.
-                data = data_dict['resp']
-
-            else:
-                data = "AUTH"
-        elif(data_dict['cmd'] == tweet):#herkese atılan tweetin server a gelmesi
-            if flag == 1:
-                #data_dict['text'] - tweet datası
-                #gelen tweet ekrana mı basılacak nereye basılacak bunu yapan fonksiyon gerekiyor
-                data = data_dict['resp']
-
-            else:
-                data = "AUTH"
-
 
     else:
         logq.put(data_dict)
@@ -322,15 +276,15 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
     return data
 
 def out_parser_client(data, type, clientSenderQueue, clientReaderQueue):
-    data_dict = clientsenderqueue
 
     return 1
-def inc_parser_client(data, type, clientSenderQueue, clientReaderQueue):
+
+def inc_parser_client(data, type, clientreaderqueue):
 
     data_dict = parser(data, type)
     if (data_dict['status'] == "OK"):
         if (data_dict['cmd'] == auid):
-            clientreaderqueue.put(data_dict) # gelen uuid bizim dict içerisinde var mı ? varsa o ip ile gelen ip aynı mı ? bunun kontrolü.
+            clientreaderqueue.put(data_dict)
         elif(data_dict['cmd'] == pubkeygitsin):
             clientreaderqueue.put(data_dict)
 

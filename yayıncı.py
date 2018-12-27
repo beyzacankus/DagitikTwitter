@@ -13,7 +13,6 @@ from loggerThread import loggerThread
 from util_functions import *
 
 #  Bir peer icin hem client hem de server var.
-
 #  Peer'in client tarafi tanimlaniyor.
 class clientThread(threading.Thread):
     def __init__(self, clientq, logq, ip, port, c_uuid, public_key, private_key):
