@@ -26,7 +26,7 @@ class clientThread(threading.Thread):
 
         log = "Aracı client çalışmaya başladı.\n"
         self.logq.put(log)
-        # -------------------------------------Eksiklikler var
+
         while True:
             my_dict = {
                 "ip": self.ip,
@@ -47,6 +47,8 @@ class clientThread(threading.Thread):
 
                     senderThread = clientSender(self.logq, self.clientSenderQueue, s)
                     senderThread.start()
+                    readerThread = clientReader(self.logq, self.clientReaderQueue, s)
+                    readerThread.start()
 
                     log = "Aracıdan IP: " + str(ip) + " Port: " + str(port) + " ile bağlantı kuruldu.\n"
                     self.logq.put(log)

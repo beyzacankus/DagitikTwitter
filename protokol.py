@@ -275,9 +275,10 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
 
     return data
 
-def out_parser_client(data, type, clientsenderqueue):
+def out_parser_client(data, type, clientSenderQueue, clientReaderQueue):
 
     return 1
+
 def inc_parser_client(data, type, clientreaderqueue):
 
     data_dict = parser(data, type)
