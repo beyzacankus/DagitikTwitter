@@ -45,7 +45,7 @@ class clientThread(threading.Thread):
             # HELO <ip> <port> <nick>
             if inp[:4] == "HELO":
                 # Mesajla gelen parametreler parse_input metoduyla ayrıştırılıyor
-                server_ip, server_port, nick = parse_input(inp)
+                server_ip, server_port, nick = parse_input(inp[5:])
                 host = server_ip
                 port = int(server_port)
 
@@ -243,9 +243,9 @@ def parse_input(inp):
     list = inp.split(delimiter)
     ip = list[0]
     port = list[1]
-    type = list[2]
-    nick = list[3]
-    bann = list[4]
+  #  type = list[2]
+    nick = list[2]
+ #   bann = list[4]
 
     return ip, port, nick
 
