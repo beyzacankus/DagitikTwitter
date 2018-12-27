@@ -6,13 +6,14 @@ import queue
 import socket
 import time
 import uuid
+from pathlib import Path
 from itertools import islice
 
 def take(n, iterable):
     "Return first n items of the iterable as a list"
     return list(islice(iterable, n))
 
-def create_rsa_key(uuid) :
+def create_rsa_key(uuid):
     random_generator = Random.new().read
     new_key = RSA.generate(2048, randfunc=random_generator)
     # print(random_generator)
@@ -21,10 +22,41 @@ def create_rsa_key(uuid) :
     private_key = new_key
     # print(new_key.exportKey())
 
-    return {uuid + "_public_key": public_key, uuid+ "_private_key": private_key}
+    return {str(uuid) + "_public_key": public_key, str(uuid)+ "_private_key": private_key}
+
+def Write_Read_RSAKeys(publicKey, privateKey,logq): #RSA keylerini dosyaya yazan eğer dosyada varsa okuyan fonksiyon
+    pubKey_file = Path("./my_pubKey.txt")
+    privKey_file = Path("./my_privKey.txt")
+
+    if pubKey_file.is_file():
+        fid_pub = open(pubKey_file, "r+")
+        keys_dict = {
+            "pubKey": fid_pub.read()
+        }
+    else:
+        fid_pub = open(pubKey_file, "w")
+        fid_pub.write(publicKey)
+        keys_dict = {
+            "pubKey": publicKey
+        }
+        logq.put("PublicKey oluşturuldu, dosyaya yazıldı.")
+    if privKey_file.is_file():
+        fid_priv = open(privKey_file, "r+")
+        keys_dict['privKey'] = fid_priv.read()
+
+    else:
+        fid_priv = open(privKey_file, "w")
+        fid_priv.write(privateKey)
+        keys_dict['privKey'] = privateKey
+
+        logq.put("PrivateKey oluşturuldu, dosyaya yazıldı.")
+
+    return keys_dict
+
 
 
 def update_public_key_dictionary(uuid, public_key) :
+
     pass
 
 
@@ -38,7 +70,7 @@ def decrypte_message(encrypted_message,receiver_private_key) :
     return decrypted.encode()
 
 
-def sign_message(message, private_key) :
+def sign_message(message, private_key):
     hash = SHA256.new(message.encode()).digest()
     signature = private_key.sign(hash, '')
     return signature
@@ -80,6 +112,7 @@ def appendToPeerDictionary(data, logq, type):
         log = "Yayıncı tarafından yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n"
 
     fid.write("%s" % data)
+    fid.flush()
     logq.put(log)
     fid.close()
 
