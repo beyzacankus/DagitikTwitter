@@ -102,26 +102,24 @@ def writeToPeerDictionary(peer_dict, logq, type):
     fid.close()
 
 #tum dictionarylerden okumak icin read
-def readFromDictionaryFile(peer_dict, logq, type, filename):
+def readFromDictionaryFile(logq, type, filename):
     fid = open(filename, "r+")
     log = type + "dosyadan kayıtları çekti.\n"  #hangi kayitlari cekti duzenle
 
     #uuid key'i ile geri kalan baglanti bilgilerini tutan peer_dict olusturur.
-    for line in fid:
-        listedline = line.strip().split('-')
-        if len(listedline) > 1:
-            peer_dict[listedline[0].strip()] = listedline[1].strip()
+    dict = eval(fid.read())
 
     logq.put(log)
     fid.close()
+    return dict
 
 # Tum dictionarylere yazmak icin genel bir append fonksiyonu
-def appendToDictionaryFile(data, logq, type, filename):
-    fid = open(filename, "a+")
-    fid.write("%s" % data)
+def appendToDictionaryFile(data_dict, logq, type, filename):
+    fid = open(filename, "w")
+    fid.write("%s\n" % data_dict)
     fid.flush()
-    log = type + "tarafından yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n" # uuid 'yi alacak şekilde duzenlenmeli
-    logq.put(log)
+    #log = type + "tarafından yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n" # uuid 'yi alacak şekilde duzenlenmeli
+    #logq.put(log)
     fid.close()
     
 # Yeni eklenen peer bilgileri ilgili dosyalara kaydediliyor.
