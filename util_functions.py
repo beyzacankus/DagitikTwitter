@@ -114,7 +114,7 @@ def readFromDictionaryFile(logq, type, filename):
     return dict
 
 # Tum dictionarylere yazmak icin genel bir append fonksiyonu
-def appendToDictionaryFile(data_dict, logq, type, filename):
+def appendToDictionaryFile(data_dict, logq, type, filename): #tüm dict tekrar dosyaya yazılır.
     fid = open(filename, "w")
     fid.write("%s\n" % data_dict)
     fid.flush()
