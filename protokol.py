@@ -242,7 +242,7 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
                         }
                         user_dict[data_dict['cuuid']] = c_dict
                         line = data_dict['cuuid'] + " -" + c_dict
-                        appendToPeerDictionary(line, logq, "yayinci")
+                        appendToDictionaryFile(line, logq, "yayinci", "yayinci_peer_dictionary.txt")
                         data = data_dict['resp1'] + " " + data_dict['cuuid']
                         flag = 1
                     else:
