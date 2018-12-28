@@ -101,21 +101,29 @@ def writeToPeerDictionary(peer_dict, logq, type):
     logq.put(log)
     fid.close()
 
-
-# Yeni eklenen peer bilgileri ilgili dosyalara kaydediliyor.
-# Araci ve yayinci için kullanilan dosya adlari karisikliklari onlemek icin farkli belirlenmistir.
-def appendToPeerDictionary(data, logq, type):
-    if (type == "araci"):
-        fid = open("araci_peer_dictionary.txt", "a+")
-        log = "Aracı tarafından yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n"
-    else:
-        fid = open("yayinci_peer_dictionary.txt", "a+")
-        log = "Yayıncı tarafından yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n"
-
+# Tum dictionarylere yazmak icin genel bir append fonksiyonu
+def appendToDictionaryFile(data, logq, type, filename):
+    fid = open(filename, "a+")
     fid.write("%s" % data)
     fid.flush()
+    log = type + "tarafından yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n" # uuid 'yi alacak şekilde duzenlenmeli
     logq.put(log)
     fid.close()
+    
+# Yeni eklenen peer bilgileri ilgili dosyalara kaydediliyor.
+# Araci ve yayinci için kullanilan dosya adlari karisikliklari onlemek icin farkli belirlenmistir.
+#def appendToPeerDictionary(data, logq, type):
+#    if (type == "araci"):
+#        fid = open("araci_peer_dictionary.txt", "a+")
+#        log = "Aracı tarafından yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n"
+#    else:
+#        fid = open("yayinci_peer_dictionary.txt", "a+")
+#        log = "Yayıncı tarafından yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n"
+#
+#    fid.write("%s" % data)
+#   fid.flush()
+#   logq.put(log)
+#  fid.close()
 
 # HELO mesajıyla alinan input ip, port, type ve nick parametrelerine ayristiriliyor
 def split_HELO_parametres(inp):

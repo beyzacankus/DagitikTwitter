@@ -132,7 +132,7 @@ class serverThread(threading.Thread):
                     else:
                         self.peer_dict[c_uuid] = rps[20:len(rps)]
                         data = c_uuid + " -" + rps[19:len(rps)]
-                        appendToPeerDictionary(data, self.logq, "araci")
+                        appendToDictionaryFile(data, self.logq, "araci", "araci_peer_dictionary.txt")
                         send = "WAIT " + c_uuid
                         c.send(send.encode())
 
