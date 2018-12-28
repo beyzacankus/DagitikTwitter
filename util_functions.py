@@ -101,21 +101,41 @@ def writeToPeerDictionary(peer_dict, logq, type):
     logq.put(log)
     fid.close()
 
+#tum dictionarylerden okumak icin read
+def readFromDictionaryFile(logq, type, filename):
+    fid = open(filename, "r+")
+    log = type + "dosyadan kayıtları çekti.\n"  #hangi kayitlari cekti duzenle
 
-# Yeni eklenen peer bilgileri ilgili dosyalara kaydediliyor.
-# Araci ve yayinci için kullanilan dosya adlari karisikliklari onlemek icin farkli belirlenmistir.
-def appendToPeerDictionary(data, logq, type):
-    if (type == "araci"):
-        fid = open("araci_peer_dictionary.txt", "a+")
-        log = "Aracı tarafından yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n"
-    else:
-        fid = open("yayinci_peer_dictionary.txt", "a+")
-        log = "Yayıncı tarafından yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n"
+    #uuid key'i ile geri kalan baglanti bilgilerini tutan peer_dict olusturur.
+    dict = eval(fid.read())
 
-    fid.write("%s" % data)
-    fid.flush()
     logq.put(log)
     fid.close()
+    return dict
+
+# Tum dictionarylere yazmak icin genel bir append fonksiyonu
+def appendToDictionaryFile(data_dict, logq, type, filename): #tüm dict tekrar dosyaya yazılır.
+    fid = open(filename, "w")
+    fid.write("%s\n" % data_dict)
+    fid.flush()
+    #log = type + "tarafından yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n" # uuid 'yi alacak şekilde duzenlenmeli
+    #logq.put(log)
+    fid.close()
+    
+# Yeni eklenen peer bilgileri ilgili dosyalara kaydediliyor.
+# Araci ve yayinci için kullanilan dosya adlari karisikliklari onlemek icin farkli belirlenmistir.
+#def appendToPeerDictionary(data, logq, type):
+#    if (type == "araci"):
+#        fid = open("araci_peer_dictionary.txt", "a+")
+#        log = "Aracı tarafından yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n"
+#    else:
+#        fid = open("yayinci_peer_dictionary.txt", "a+")
+#        log = "Yayıncı tarafından yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n"
+#
+#    fid.write("%s" % data)
+#   fid.flush()
+#   logq.put(log)
+#  fid.close()
 
 # HELO mesajıyla alinan input ip, port, type ve nick parametrelerine ayristiriliyor
 def split_HELO_parametres(inp):

@@ -34,8 +34,7 @@ class clientThread(threading.Thread):
                 "c_uuid": self.c_uuid
             }
 
-            peer_dict = {}
-            writeToPeerDictionary(peer_dict, self.logq, "araci")
+            peer_dict = readFromDictionaryFile(self.logq, "araci", "araci_peer_dictionary.txt")
 
             while True:
                 # peer_dict'te kayitli her kullanici ile iletisim baslatma
@@ -132,7 +131,7 @@ class serverThread(threading.Thread):
                     else:
                         self.peer_dict[c_uuid] = rps[20:len(rps)]
                         data = c_uuid + " -" + rps[19:len(rps)]
-                        appendToPeerDictionary(data, self.logq, "araci")
+                        appendToDictionaryFile(data, self.logq, "araci", "araci_peer_dictionary.txt")
                         send = "WAIT " + c_uuid
                         c.send(send.encode())
 
@@ -177,8 +176,7 @@ def main():
 
     # Kullanıcı kayıtlarının tutulacağı dictionary
     # write_dictionary ile text dosyası çağırılıp önceki kayıtlar dictionary içerisine yazılıyor
-    server_dict = {}
-    writeToPeerDictionary(server_dict, logQueue, "araci")
+    server_dict = readFromDictionaryFile(logQueue, "araci", "araci_peer_dictionary.txt")
 
     # MAC adresiyle UUID
     client_uuid = uuid.getnode()
