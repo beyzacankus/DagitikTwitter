@@ -107,11 +107,14 @@ def readFromDictionaryFile(logq, type, filename):
     log = type + "dosyadan kayıtları çekti.\n"  #hangi kayitlari cekti duzenle
 
     #uuid key'i ile geri kalan baglanti bilgilerini tutan peer_dict olusturur.
-    dict = eval(fid.read())
-
-    logq.put(log)
-    fid.close()
+    try:
+        dict = eval(fid.read())
+        logq.put(log)
+        fid.close()
+    except SyntaxError:
+        return {}
     return dict
+
 
 # Tum dictionarylere yazmak icin genel bir append fonksiyonu
 def appendToDictionaryFile(data_dict, logq, type, filename): #tüm dict tekrar dosyaya yazılır.
