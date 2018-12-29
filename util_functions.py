@@ -101,23 +101,27 @@ def writeToPeerDictionary(peer_dict, logq, type):
     logq.put(log)
     fid.close()
 
+
 #tum dictionarylerden okumak icin read
 def readFromDictionaryFile(logq, type, filename):
-    fid = open(filename, "r+")
-    log = type + "dosyadan kayıtları çekti.\n"  #hangi kayitlari cekti duzenle
-
-    #uuid key'i ile geri kalan baglanti bilgilerini tutan peer_dict olusturur.
     try:
+        filename = str(type) + filename
+        fid = open(filename, "r+")
+        log = type + "dosyadan kayıtları çekti.\n"  #hangi kayitlari cekti duzenle
+
+        #uuid key'i ile geri kalan baglanti bilgilerini tutan peer_dict olusturur.
+
         dict = eval(fid.read())
         logq.put(log)
         fid.close()
-    except SyntaxError:
+    except:
         return {}
     return dict
 
 
 # Tum dictionarylere yazmak icin genel bir append fonksiyonu
 def appendToDictionaryFile(data_dict, logq, type, filename): #tüm dict tekrar dosyaya yazılır.
+    filename = str(type) + filename
     fid = open(filename, "w")
     fid.write("%s\n" % data_dict)
     fid.flush()
