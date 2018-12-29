@@ -148,7 +148,7 @@ def appendToDictionaryFile(data_dict, logq, type, filename): #tüm dict tekrar d
 def split_HELO_parametres(inp):
 
     ip = inp['cip']
-    port = inp['cport']
+    port = int(inp['cport'])
     type = inp['ctype']
     nick = inp['cnick']
 
