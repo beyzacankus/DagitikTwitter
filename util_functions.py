@@ -146,15 +146,10 @@ def appendToDictionaryFile(data_dict, logq, type, filename): #tüm dict tekrar d
 
 # HELO mesajıyla alinan input ip, port, type ve nick parametrelerine ayristiriliyor
 def split_HELO_parametres(inp):
-    inp = str(inp)
-    nick = ""
-    ip = ""
-    port = ""
-    delimiter = " "
-    list = inp.split(delimiter)
-    ip = list[0]
-    port = list[1]
-    type = list[2]
-    nick = list[3]
+
+    ip = inp['cip']
+    port = inp['cport']
+    type = inp['ctype']
+    nick = inp['cnick']
 
     return ip, port, type, nick
