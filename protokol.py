@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 import sys
+import threading
+import queue
+import socket
+import time
+import uuid
 from loggerThread import loggerThread
 from util_functions import *
 
@@ -54,6 +59,17 @@ def parser(data, type): #AUTH ve BLCK hataları ana kod içerisinde yazılacak
                 "cport": splitLine[3].strip(),
                 "ctype": splitLine[4].strip(),
                 "cnick": splitLine[5].strip()
+            }
+        elif(command == hosgeldin):
+            rdict = {
+                'status': "OK",
+                'cmd': hosgeldin,
+                'resp': list
+            }
+        elif(command == bekle):
+            rdict = {
+                'status':"OK",
+                'cmd':command,
             }
         elif(command == suid): #suid argüman almaz ancak auid dönüş yaparken uuid parametresi ile döner.
             rdict = {
@@ -221,7 +237,7 @@ def parser(data, type): #AUTH ve BLCK hataları ana kod içerisinde yazılacak
 
     return rdict
 
-def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueue, clientreaderqueue, public_key, r_pub_key):
+def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueue, clientreaderqueue, public_key, soket):
 
     data_dict = parser(data,type)
 
@@ -230,24 +246,18 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
             if(data_dict['cuuid'] in user_dict):
                 data = data_dict['resp2'] + " " + data_dict['cuuid']
             else: #WAIT burada göndereliyor ancak ekleme yapmak için client threadinin SUID kontrolünün sonucunu beklemek gerekiyor.
-                clientsenderqueue.put("SUID")
-                while not clientreaderqueue.empty():
-                    reader_data = clientreaderqueue.get() ##devamı gelecek.
-                    if(reader_data['uuid'] == data_dict['cuuid']):#client reader queue dict yazılmış gibi değerlendirildi.
-                        c_dict = {
-                            "cip": data_dict['cip'],
-                            "cport": data_dict['cport'],
-                            "ctype": data_dict["ctype"],
-                            "cnick": data_dict["cnick"]
-                        }
-                        user_dict[data_dict['cuuid']] = c_dict
-                        line = data_dict['cuuid'] + " -" + c_dict
-                        appendToDictionaryFile(line, logq, "yayinci", "yayinci_peer_dictionary.txt")
-                        data = data_dict['resp1'] + " " + data_dict['cuuid']
-                        flag = 1
-                    else:
-                        break
-            data += "\nThank you for connecting!"
+                data = data_dict['resp1']
+                command = {
+                    'ip':data_dict['cip'],
+                    'port':data_dict['cport'],
+                    'cmd':"SUID",
+                    'soket':soket,
+                    'data_dict':data_dict
+                }
+                print(command)
+                clientsenderqueue.put(command)
+        elif(data_dict['cmd'] == hosgeldin):
+            data = data_dict['resp']
 
         elif(data_dict['cmd'] == list):
 
@@ -266,7 +276,9 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
         elif(data_dict['cmd'] == pubkeygeldi):
             if flag == 1:
                 r_pub_key = data_dict['cpubkey']
+
                 data = data_dict['resp'] + " " + public_key
+
             else:
                 data = "AUTH"
     else:
