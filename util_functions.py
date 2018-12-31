@@ -84,6 +84,7 @@ def check_signature(message, signature, sender_public_key) :
 
 # Peer bilgileri ilgili dosyalardan okunuyor ve bir dictionary'e kaydediliyor.
 # Araci ve yayinci için kullanilan dosya adlari karisikliklari onlemek icin farkli belirlenmistir.
+""""
 def writeToPeerDictionary(peer_dict, logq, type):
     if(type == "araci"):
         fid = open("araci_peer_dictionary.txt", "r+")
@@ -100,7 +101,7 @@ def writeToPeerDictionary(peer_dict, logq, type):
 
     logq.put(log)
     fid.close()
-
+""""
 
 #tum dictionarylerden okumak icin read
 def readFromDictionaryFile(logq, type, filename):
@@ -153,3 +154,17 @@ def split_HELO_parametres(inp):
     nick = inp['cnick']
 
     return ip, port, type, nick
+
+
+# sozlukleri birlestiren fonksiyon
+def mergeTwoDict(ourKey, otherKey):
+    # ilk for aynı keylerin timestamplerini karsilastirmak icin
+    for ourKey in ourDict.keys():
+        for otherKey in otherDict.keys():
+            if ourKey == otherKey:
+                if ourDict[ourKey]["timestamp"] < otherDict[otherKey]["timestamp"]: # timestamp'i time.time() olarak denedim float donduruyor
+                    ourDict[ourKey] = otherDict[otherKey]
+    # ikinci for bizde olmayan itemleri almak icin
+    for otherKey in otherDict.keys():
+        if not otherKey in ourDict.keys():
+            ourDict[otherKey] = otherDict[otherKey]
