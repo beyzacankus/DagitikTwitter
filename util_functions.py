@@ -101,7 +101,7 @@ def writeToPeerDictionary(peer_dict, logq, type):
 
     logq.put(log)
     fid.close()
-""""
+"""""
 
 #tum dictionarylerden okumak icin read
 def readFromDictionaryFile(logq, type, filename):
@@ -157,7 +157,7 @@ def split_HELO_parametres(inp):
 
 
 # sozlukleri birlestiren fonksiyon
-def mergeTwoDict(ourKey, otherKey):
+def mergeTwoDict(ourDict, otherDict):
     # ilk for aynı keylerin timestamplerini karsilastirmak icin
     for ourKey in ourDict.keys():
         for otherKey in otherDict.keys():
