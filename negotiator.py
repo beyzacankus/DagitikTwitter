@@ -2,6 +2,7 @@ import threading
 import queue
 import socket
 import time
+import datetime
 import uuid
 
 from loggerThread import loggerThread
@@ -60,7 +61,8 @@ def list_control(peer_dict, logq, my_ip, my_port, my_uuid,): #bu kod içerisinde
                 'ip': ip,
                 'port': port,
                 'cmd': msg,
-                'cuuid': key
+                'cuuid': key,
+                'last_login': last_login
             }
             clientSenderQueue.put(sender_dict)
         except:
@@ -234,8 +236,8 @@ class clientToServer(threading.Thread):
                         "cport": data_dict['cport' ],
                         "ctype": data_dict[ "ctype" ],
                         "cnick": data_dict[ "cnick" ],
-                        #timestamp eklenecek!!!
-                        #pubkey
+                        "last_login": time.time(), # time değeri float cinsinde atılıyor. Bu değeri datetime cinsine dönüştürmek için datetime.datetime.fromtimestamp(x) fonksiyonu verilmeli ve x yerine float değer yazılmalı
+                        #pubkey eklenecek
                     }
                     server_dict[data_dict['cuuid']] = c_dict
                     appendToDictionaryFile(server_dict, self.logq, "araci", "_peer_dictionary.txt")
