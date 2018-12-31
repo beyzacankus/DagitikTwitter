@@ -14,7 +14,7 @@ bekle = "WAIT"
 suid = "SUID"
 auid = "AUID"
 list = "LIST"
-listo = "LISTO"
+listo = "LSTO"
 pubkeygeldi = "PUBR"
 pubkeygitsin = "PUBO"
 pubkeycontrol = "PUBC"
@@ -89,7 +89,12 @@ def parser(data, type): #AUTH ve BLCK hataları ana kod içerisinde yazılacak
                 "status": "OK",
                 "cmd": list,
                 "resp": listo,
-                "count": splitLine[1].strip()
+            }
+        elif(command == listo):
+            rdict = {
+                "status": "OK",
+                "cmd":listo,
+                "list":data[5:]
             }
 
         elif(command == pubkeygeldi): #cpubkey ile gelen pubkey i alıyoruz. gönderim yaparken kendi pubkey imizi göndereceğiz.
@@ -98,7 +103,7 @@ def parser(data, type): #AUTH ve BLCK hataları ana kod içerisinde yazılacak
                     "status" : "OK",
                     "cmd": pubkeygeldi,
                     "resp": pubkeygitsin,
-                    "cpubkey": splitLine[1].strip()
+                    "cpubkey": data[5:]
                 }
             else:
                 rdict = {
@@ -110,7 +115,7 @@ def parser(data, type): #AUTH ve BLCK hataları ana kod içerisinde yazılacak
                 rdict = {
                     "status" : "OK",
                     "cmd": pubkeygitsin,
-                    "spubkey": splitLine[1].strip()
+                    "spubkey": data[5:]
                 }
             else:
                 rdict = {
@@ -240,11 +245,14 @@ def parser(data, type): #AUTH ve BLCK hataları ana kod içerisinde yazılacak
 def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueue, clientreaderqueue, public_key, soket):
 
     data_dict = parser(data,type)
-
+    data = ""
     if(data_dict['status'] == "OK"):
         if(data_dict['cmd'] == merhaba):
             if(data_dict['cuuid'] in user_dict):
                 data = data_dict['resp2'] + " " + data_dict['cuuid']
+                #eğer uuid var ve ip-port farklı ise güncelle sonra welcome dön
+                #gelen_port
+                #gelen uuid
             else: #WAIT burada göndereliyor ancak ekleme yapmak için client threadinin SUID kontrolünün sonucunu beklemek gerekiyor.
                 data = data_dict['resp1']
                 command = {
@@ -262,10 +270,7 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
         elif(data_dict['cmd'] == list):
 
             if flag == 1:
-                if(data_dict['count'] > 0): #sıfırdan büyük olması durumunda count kadar kayıt liste olarak döner
-                    data = data_dict['resp'] + " " + str(take(data_dict['count'], user_dict.items()))
-                else:
-                    data = data_dict['resp'] + " " + str(user_dict)
+                data = data_dict['resp'] + " " + str(user_dict)
             else:
                 data = "AUTH"
 
@@ -282,21 +287,30 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
             else:
                 data = "AUTH"
     else:
+        soket.send(str(data_dict['resp']).encode())
         logq.put(data_dict)
+        soket.close()
 
     return data
 
-def out_parser_client(data, type, clientSenderQueue, clientReaderQueue):
+def out_parser_client(data, type, my_pub_key, clientSenderQueue, clientReaderQueue):
 
     return 1
 
-def inc_parser_client(data, type, clientreaderqueue):
+def inc_parser_client(data, type, server_dict, clientreaderqueue):
 
     data_dict = parser(data, type)
     if (data_dict['status'] == "OK"):
-        if (data_dict['cmd'] == auid):
-            clientreaderqueue.put(data_dict)
-        elif(data_dict['cmd'] == pubkeygitsin):
+        if (data_dict['cmd'] == listo):
+
+            #dict karşılaştırma fonksiyonu burada çağrılacak
+
+            #data_dict['list']
+            print("")
+
+        elif(data_dict['cmd'] == pubkeygeldi):
+            #gelen pub_key i alacak server_dict te ekleyecek fonksiyon
+
             clientreaderqueue.put(data_dict)
 
     return 1
