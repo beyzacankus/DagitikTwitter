@@ -152,8 +152,9 @@ def split_HELO_parametres(inp):
     port = int(inp['cport'])
     type = inp['ctype']
     nick = inp['cnick']
+    last_login = inp['last_login']
 
-    return ip, port, type, nick
+    return ip, port, type, nick, last_login
 
 
 # sozlukleri birlestiren fonksiyon

@@ -49,7 +49,7 @@ def list_control(peer_dict, logq, my_ip, my_port, my_uuid,): #bu kod içerisinde
     # peer_dict'te kayitli her kullanici ile iletisim baslatma
     for key in peer_dict:
         # Kullaniciya ait bilgiler ayristiriliyor
-        ip, port, type, nick = split_HELO_parametres(peer_dict[ key ])
+        ip, port, type, nick, last_login = split_HELO_parametres(peer_dict[ key ])
         # Kullaniciyla baglanti baslatiliyor
         try:
             log = "Aracıdan IP: " + str(ip) + " Port: " + str(port) + " ile bağlantı kuruldu.\n"
