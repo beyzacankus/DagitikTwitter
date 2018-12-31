@@ -250,6 +250,10 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
         if(data_dict['cmd'] == merhaba):
             if(data_dict['cuuid'] in user_dict):
                 data = data_dict['resp2'] + " " + data_dict['cuuid']
+                user_dict[data_dict['cuuid']]['cip'] = data_dict['cip']
+                user_dict[data_dict['cuuid']]['cport'] = data_dict['cport']
+                user_dict[data_dict['cuuid']]['last_login'] = time.time()
+                appendToDictionaryFile(user_dict, logq, "araci", "_peer_dictionary.txt")
                 #eğer uuid var ve ip-port farklı ise güncelle sonra welcome dön
                 #gelen_port
                 #gelen uuid
