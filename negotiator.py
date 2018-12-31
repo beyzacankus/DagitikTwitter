@@ -13,8 +13,13 @@ logQueue = queue.Queue()
 clientSenderQueue = queue.Queue()
 clientReaderQueue = queue.Queue()
 clientToServerQueue = queue.Queue()
+
+#ser
 serverSenderQueue = queue.Queue()
 serverReaderQueue = queue.Queue()
+
+tip = "araci"
+
 server_dict = readFromDictionaryFile(logQueue, "araci", "_peer_dictionary.txt")
 #  Bir peer icin hem client hem de server var.
 
@@ -35,7 +40,6 @@ class clientThread(threading.Thread): #Bu client aracı için çalıştığında
         self.logq.put(log)
 
         while True:
-
             while not clientSenderQueue.empty():
                 data_dict = clientSenderQueue.get()
                 client_sender_thread = clientSender(self.logq, data_dict)
@@ -73,7 +77,7 @@ class clientSender(threading.Thread):
     def run(self):
         log = "Aracı Client Sender Thread çalışmaya başladı.\n"
         self.logq.put(log)
-        try:
+        try: #senderqueue dan gelen soket kontrolü
             data = self.data_dict
             print("ClientSenderCalisti - " + str(data))
             log = "Aracı Client SenderQue gelen data : " + str(data) + "\n"
@@ -116,19 +120,24 @@ class clientReader(threading.Thread):
             data['server_soket'] = data_queue['server_soket']
             data['data_dict'] = data_queue['data_dict']
             print(data)
-            clientToServerQueue.put(data)
-            client_toserver = clientToServer(self.logq)
-            client_toserver.start()
+
+            if(data['cmd'] == "AUID"):
+                clientToServerQueue.put(data)
+                client_toserver = clientToServer(self.logq)
+                client_toserver.start()
+            else:
+                print("farklı protokol")
+                #inc_parser_client(data, tip, server_dict, )
+
 
             #inc_parser_client(msg, "A", clientReaderQueue)
 
 # Server için thread
 class serverThread(threading.Thread):
-    def __init__(self, logq, soket, peer_dict, my_uuid, pub_key):
+    def __init__(self, logq, peer_dict, my_uuid, pub_key):
         threading.Thread.__init__(self)
         self.pub_key = pub_key
         self.logq = logq
-        self.soket = soket
         self.my_uuid = my_uuid
         self.peer_dict = peer_dict # uuid ve baglanti adreslerinin oldugu dictionary
 
@@ -136,27 +145,32 @@ class serverThread(threading.Thread):
         log = "Aracı Server Thread çalışmaya başladı.\n"
         self.logq.put(log)
 
-        while True:
-            c, addr = self.soket.accept()
-            log = "Aracı şu adresle bağlantı sağlandı: " + str(addr)
-            self.logq.put(log)
+        while not serverReaderQueue.empty():
+            soket =  serverReaderQueue.get()
+            c = soket['c']
+            addr = soket['addr']
             print("Soket Server\n")
 
             # Kullanıcı kayıt olup olmadığı flag ile tutuluyor
-            flag = 0
+            flag = 1
             c_uuid = ""
-
             while True:
                 print("Recv Server\n")
-                rps = c.recv(1024).decode()
-                data_dict = parser(rps, "araci")
-                data_rcv = inc_parser_server(rps, self.my_uuid, "araci", self.logq, self.peer_dict,
-                                         "0", clientSenderQueue, clientReaderQueue, self.pub_key ,c)
+                try:
+                    rps = c.recv(1024).decode()
+                    data_dict = parser(rps, "araci")
+                    data_rcv = inc_parser_server(rps, self.my_uuid, "araci", self.logq, self.peer_dict,
+                                             flag, clientSenderQueue, clientReaderQueue, self.pub_key ,c)
+                    data = parser(data_rcv, "araci")
+                    print(data)
+                    if(data_rcv):
 
-
-                data = parser(data_rcv, "araci")
-                print(data)
-                c.send(data_rcv.encode())
+                        c.send(data_rcv.encode())
+                except OSError:
+                    log = "Soket hatası\n"
+                    self.logq.put(log)
+                    print(log)
+                    break
 
                 """
                 # Bağlanıldı mesajı
@@ -216,10 +230,12 @@ class clientToServer(threading.Thread):
                 if ((reader_data[ 'cmd' ] == "AUID") and (reader_data[ 'uuid' ] == data_dict[
                     'cuuid' ])):  # client reader queue dict yazılmış gibi değerlendirildi.
                     c_dict = {
-                        "cip": data_dict[ 'cip' ],
-                        "cport": data_dict[ 'cport' ],
+                        "cip": data_dict['cip'],
+                        "cport": data_dict['cport' ],
                         "ctype": data_dict[ "ctype" ],
-                        "cnick": data_dict[ "cnick" ]
+                        "cnick": data_dict[ "cnick" ],
+                        #timestamp eklenecek!!!
+                        #pubkey
                     }
                     server_dict[data_dict['cuuid']] = c_dict
                     appendToDictionaryFile(server_dict, self.logq, "araci", "_peer_dictionary.txt")
@@ -230,6 +246,7 @@ class clientToServer(threading.Thread):
                     log = "AUID WAIT eşleşmesi yapılamadı\n"
                     self.logq.put(log)
                     print(log)
+                    c.close()
                     break
 
 def main():
@@ -277,10 +294,22 @@ def main():
 
     #--------------------------------------RSA KEYS
 
-    server_thread = serverThread(logQueue, s1, server_dict, my_uuid, public_key)
-    server_thread.start()
     client_thread = clientThread(server_dict, clientSenderQueue, clientReaderQueue, logQueue, ip, port, my_uuid)
     client_thread.start()
+
+    while True:
+        c, addr = s1.accept()
+        gelen_soket = {
+            'c': c,
+            'addr': addr
+        }
+        #print(addr[1])
+        serverReaderQueue.put(gelen_soket)
+        logQueue.put('Got connection from ' + str(addr))
+        server_thread = serverThread(logQueue, server_dict, my_uuid, public_key)
+        server_thread.start()
+
+
 
 
 
