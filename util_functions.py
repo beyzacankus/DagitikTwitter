@@ -8,6 +8,7 @@ import time
 import uuid
 from pathlib import Path
 from itertools import islice
+from datetime import datetime
 
 def take(n, iterable):
     "Return first n items of the iterable as a list"
@@ -169,3 +170,8 @@ def mergeTwoDict(ourDict, otherDict):
     for otherKey in otherDict.keys():
         if not otherKey in ourDict.keys():
             ourDict[otherKey] = otherDict[otherKey]
+
+
+def timestamptodate(user_dict):
+    for key in user_dict:
+        user_dict[key]['last_login'] = datetime.utcfromtimestamp(user_dict[key]['last_login']).strftime("%m/%d/%Y %H:%M:%S")

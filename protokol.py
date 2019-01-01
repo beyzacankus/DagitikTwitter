@@ -7,6 +7,7 @@ import time
 import uuid
 from loggerThread import loggerThread
 from util_functions import *
+from datetime import datetime
 
 merhaba = "HELO"
 hosgeldin = "WLCM"
@@ -58,7 +59,7 @@ def parser(data, type): #AUTH ve BLCK hataları ana kod içerisinde yazılacak
                 "cip": splitLine[2].strip(),
                 "cport": splitLine[3].strip(),
                 "ctype": splitLine[4].strip(),
-                "cnick": splitLine[5].strip()
+                "cnick": splitLine[5].strip(),
             }
         elif(command == hosgeldin):
             rdict = {
@@ -274,6 +275,7 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
         elif(data_dict['cmd'] == list):
 
             if flag == 1:
+                timestamptodate(user_dict)
                 data = data_dict['resp'] + " " + str(user_dict)
             else:
                 data = "AUTH"

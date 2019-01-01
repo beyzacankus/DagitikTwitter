@@ -163,8 +163,10 @@ class serverThread(threading.Thread):
                     data_dict = parser(rps, "araci")
                     data_rcv = inc_parser_server(rps, self.my_uuid, "araci", self.logq, self.peer_dict,
                                              flag, clientSenderQueue, clientReaderQueue, self.pub_key ,c)
+
                     data = parser(data_rcv, "araci")
                     print(data)
+                    data_rcv += "\n"
                     if(data_rcv):
 
                         c.send(data_rcv.encode())
