@@ -39,12 +39,14 @@ class clientThread(threading.Thread): #Bu client aracı için çalıştığında
     def run(self):
         log = "Aracı client çalışmaya başladı.\n"
         self.logq.put(log)
+        skt = socket.socket()
 
         while True:
             while not clientSenderQueue.empty():
                 data_dict = clientSenderQueue.get()
-                client_sender_thread = clientSender(self.logq, data_dict)
+                client_sender_thread = clientSender(self.logq, data_dict, skt)
                 client_sender_thread.start()
+
 
 def list_control(peer_dict, logq, my_ip, my_port, my_uuid,): #bu kod içerisinde time sleep olduğu için bunu çağıracak thread in başka işi olduğunda bekleme yapıyor
     # peer_dict'te kayitli her kullanici ile iletisim baslatma
@@ -69,12 +71,14 @@ def list_control(peer_dict, logq, my_ip, my_port, my_uuid,): #bu kod içerisinde
             continue
         time.sleep(60)
 
+
 # Client için sender thread
 class clientSender(threading.Thread):
-    def __init__(self, logq, data_dict):
+    def __init__(self, logq, data_dict, skt):
         threading.Thread.__init__(self)
         self.logq = logq
         self.data_dict = data_dict
+        self.skt = skt
 
     def run(self):
         log = "Aracı Client Sender Thread çalışmaya başladı.\n"
@@ -84,22 +88,32 @@ class clientSender(threading.Thread):
             print("ClientSenderCalisti - " + str(data))
             log = "Aracı Client SenderQue gelen data : " + str(data) + "\n"
             self.logq.put(log)
-
-            skt = socket.socket()
-            ip = data['ip']
-            port = int(data['port'])
-            skt.connect((ip, port))
-            skt.send((data['cmd'] + "\n").encode())
+            data = parser(data, "araci")
+            self.skt.send((data['cmd'] + "\n").encode())
             command = {
-                'skt':skt,
+                'skt':self.skt,
                 'server_soket':data['soket'],
                 'data_dict': data['data_dict']
             }
             clientReaderQueue.put(command)
             client_reader = clientReader(self.logq)
             client_reader.start()
+
         except:
-            print("client sender hata")
+            data = self.data_dict
+            data = parser(data, "araci")
+
+            self.skt.connect((data["cip"], int(data["cport"])))
+
+            self.skt.send((data['cmd'] + "\n").encode())
+            command = {
+                'skt':self.skt,
+                'server_soket':data['soket'],
+                'data_dict': data['data_dict']
+            }
+            clientReaderQueue.put(command)
+            client_reader = clientReader(self.logq)
+            client_reader.start()
 
 
 
@@ -148,7 +162,7 @@ class serverThread(threading.Thread):
         self.logq.put(log)
 
         while not serverReaderQueue.empty():
-            soket =  serverReaderQueue.get()
+            soket = serverReaderQueue.get()
             c = soket['c']
             addr = soket['addr']
             print("Soket Server\n")
@@ -214,6 +228,8 @@ class serverThread(threading.Thread):
                 else:
                     c.send("ERRO".encode())
                 """
+
+
 class clientToServer(threading.Thread):
     def __init__(self, logq):
         threading.Thread.__init__(self)
@@ -273,8 +289,6 @@ def main():
     # Kullanıcı kayıtlarının tutulacağı dictionary
     # write_dictionary ile text dosyası çağırılıp önceki kayıtlar dictionary içerisine yazılıyor
 
-
-
     # MAC adresiyle UUID
     my_uuid = str(uuid.getnode())
     print(my_uuid)
@@ -312,11 +326,6 @@ def main():
         logQueue.put('Got connection from ' + str(addr))
         server_thread = serverThread(logQueue, server_dict, my_uuid, public_key)
         server_thread.start()
-
-
-
-
-
 
 
 if __name__ == '__main__':
