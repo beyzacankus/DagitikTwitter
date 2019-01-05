@@ -107,8 +107,6 @@ class clientSender(threading.Thread):
             log = "client sender hata - " + str(e)
             self.logq.put(log)
             print(log)
-            continue
-
 
 class clientReader(threading.Thread):
     def __init__(self, logq):
