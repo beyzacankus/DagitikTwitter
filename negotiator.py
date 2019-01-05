@@ -120,7 +120,7 @@ class clientReader(threading.Thread):
 
         while not clientReaderQueue.empty():
             data_queue = clientReaderQueue.get()
-            skt = data_queue['server_soket']
+            skt = data_queue['skt']
             msg = skt.recv(1024).decode()
             print(msg)
             data = parser(msg, "A")
