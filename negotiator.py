@@ -66,7 +66,9 @@ def list_control(peer_dict, logq, my_ip, my_port, my_uuid,): #bu kod içerisinde
                 'last_login': last_login
             }
             clientSenderQueue.put(sender_dict)
-        except:
+        except Exception as e:
+            logq.put(e)
+            print(e)
             continue
         time.sleep(60)
 
@@ -101,8 +103,11 @@ class clientSender(threading.Thread):
             client_reader = clientReader(self.logq)
             client_reader.start()
 
-        except:
-            print("client sender hata")
+        except Exception as e:
+            log = "client sender hata - " + str(e)
+            self.logq.put(log)
+            print(log)
+            continue
 
 
 class clientReader(threading.Thread):
@@ -165,15 +170,13 @@ class serverThread(threading.Thread):
                     data_dict = parser(rps, "araci")
                     data_rcv = inc_parser_server(rps, self.my_uuid, "araci", self.logq, self.peer_dict,
                                              flag, clientSenderQueue, clientReaderQueue, self.pub_key ,c)
-
                     data = parser(data_rcv, "araci")
                     print(data)
                     data_rcv += "\n"
                     if(data_rcv):
-
                         c.send(data_rcv.encode())
-                except OSError:
-                    log = "Soket hatası\n"
+                except Exception as e:
+                    log = "Soket hatası\n" + str(e)
                     self.logq.put(log)
                     print(log)
                     break
