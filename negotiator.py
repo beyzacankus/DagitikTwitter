@@ -96,7 +96,7 @@ class clientSender(threading.Thread):
             skt.send((data['cmd'] + "\n").encode())
             command = {
                 'skt': skt,
-                'server_soket': data['skt'],
+                'server_soket': data['soket'],
                 'data_dict': data['data_dict']
             }
             clientReaderQueue.put(command)
