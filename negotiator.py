@@ -90,31 +90,32 @@ class clientSender(threading.Thread):
             self.logq.put(log)
             data = parser(data, "araci")
             self.skt.send((data['cmd'] + "\n").encode())
+            data['skt'] = self.skt
+            data['data_dict'] = self.data_dict
             command = {
-                'skt':self.skt,
-                'server_soket':data['soket'],
+                'server_soket': data['skt'],
                 'data_dict': data['data_dict']
             }
             clientReaderQueue.put(command)
             client_reader = clientReader(self.logq)
             client_reader.start()
 
-        except:
+        except OSError:
             data = self.data_dict
             data = parser(data, "araci")
 
             self.skt.connect((data["cip"], int(data["cport"])))
 
-            self.skt.send((data['cmd'] + "\n").encode())
+            self.skt.send((data['cmd'] + " " + data['cuuid'] + " " + data['cip'] + " " + data['cport'] + " " + data['ctype'] + " " + data['cnick']).encode())
+            data['skt'] = self.skt
+            data['data_dict'] = self.data_dict
             command = {
-                'skt':self.skt,
-                'server_soket':data['soket'],
+                'server_soket': data['skt'],
                 'data_dict': data['data_dict']
             }
             clientReaderQueue.put(command)
             client_reader = clientReader(self.logq)
             client_reader.start()
-
 
 
 class clientReader(threading.Thread):
@@ -129,7 +130,7 @@ class clientReader(threading.Thread):
 
         while not clientReaderQueue.empty():
             data_queue = clientReaderQueue.get()
-            skt = data_queue['skt']
+            skt = data_queue['server_soket']
             msg = skt.recv(1024).decode()
             print(msg)
             data = parser(msg, "A")
@@ -247,8 +248,7 @@ class clientToServer(threading.Thread):
                 print("reader data\n" + str(reader_data))
                 c = reader_data[ 'server_soket' ]
                 data_dict = reader_data[ 'data_dict' ]
-                if ((reader_data[ 'cmd' ] == "AUID") and (reader_data[ 'uuid' ] == data_dict[
-                    'cuuid' ])):  # client reader queue dict yazılmış gibi değerlendirildi.
+                if ((reader_data[ 'cmd' ] == "AUID") and (reader_data['uuid'] == data_dict['cuuid'])):  # client reader queue dict yazılmış gibi değerlendirildi.
                     c_dict = {
                         "cip": data_dict['cip'],
                         "cport": data_dict['cport' ],
