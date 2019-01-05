@@ -39,12 +39,11 @@ class clientThread(threading.Thread): #Bu client aracı için çalıştığında
     def run(self):
         log = "Aracı client çalışmaya başladı.\n"
         self.logq.put(log)
-        skt = socket.socket()
 
         while True:
             while not clientSenderQueue.empty():
                 data_dict = clientSenderQueue.get()
-                client_sender_thread = clientSender(self.logq, data_dict, skt)
+                client_sender_thread = clientSender(self.logq, data_dict)
                 client_sender_thread.start()
 
 
@@ -74,11 +73,10 @@ def list_control(peer_dict, logq, my_ip, my_port, my_uuid,): #bu kod içerisinde
 
 # Client için sender thread
 class clientSender(threading.Thread):
-    def __init__(self, logq, data_dict, skt):
+    def __init__(self, logq, data_dict):
         threading.Thread.__init__(self)
         self.logq = logq
         self.data_dict = data_dict
-        self.skt = skt
 
     def run(self):
         log = "Aracı Client Sender Thread çalışmaya başladı.\n"
@@ -88,11 +86,14 @@ class clientSender(threading.Thread):
             print("ClientSenderCalisti - " + str(data))
             log = "Aracı Client SenderQue gelen data : " + str(data) + "\n"
             self.logq.put(log)
-            data = parser(data, "araci")
-            self.skt.send((data['cmd'] + "\n").encode())
-            data['skt'] = self.skt
-            data['data_dict'] = self.data_dict
+
+            skt = socket.socket()
+            ip = data['ip']
+            port = int(data['port'])
+            skt.connect((ip, port))
+            skt.send((data['cmd'] + "\n").encode())
             command = {
+                'skt': skt,
                 'server_soket': data['skt'],
                 'data_dict': data['data_dict']
             }
@@ -100,22 +101,8 @@ class clientSender(threading.Thread):
             client_reader = clientReader(self.logq)
             client_reader.start()
 
-        except OSError:
-            data = self.data_dict
-            data = parser(data, "araci")
-
-            self.skt.connect((data["cip"], int(data["cport"])))
-
-            self.skt.send((data['cmd'] + " " + data['cuuid'] + " " + data['cip'] + " " + data['cport'] + " " + data['ctype'] + " " + data['cnick']).encode())
-            data['skt'] = self.skt
-            data['data_dict'] = self.data_dict
-            command = {
-                'server_soket': data['skt'],
-                'data_dict': data['data_dict']
-            }
-            clientReaderQueue.put(command)
-            client_reader = clientReader(self.logq)
-            client_reader.start()
+        except:
+            print("client sender hata")
 
 
 class clientReader(threading.Thread):
@@ -254,7 +241,7 @@ class clientToServer(threading.Thread):
                         "cport": data_dict['cport' ],
                         "ctype": data_dict[ "ctype" ],
                         "cnick": data_dict[ "cnick" ],
-                        "last_login": time.time(), # time değeri float cinsinde atılıyor. Bu değeri datetime cinsine dönüştürmek için datetime.datetime.fromtimestamp(x) fonksiyonu verilmeli ve x yerine float değer yazılmalı
+                        "last_login": time.ctime(time.time()), # time değeri float cinsinde atılıyor. Bu değeri datetime cinsine dönüştürmek için datetime.datetime.fromtimestamp(x) fonksiyonu verilmeli ve x yerine float değer yazılmalı
                         #pubkey eklenecek
                     }
                     server_dict[data_dict['cuuid']] = c_dict
