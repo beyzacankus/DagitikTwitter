@@ -15,6 +15,7 @@ class loggerThread(threading.Thread):
         file = open("log.txt", 'a+')
         file.write("-----------------------------------\n")
         file.write("Logger starting.\n")
+        file.flush()
         while not exitFlag:
 
             if not self.logQueue.empty():
