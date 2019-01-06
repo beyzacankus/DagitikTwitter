@@ -269,16 +269,16 @@ def main():
     # Server için soket bağlantıları
     s1 = socket.socket()
     host = "0.0.0.0"
-    port = 4565
-    #port = int(sys.argv[2])
+    #port = 4565
+    port = int(sys.argv[2])
     s1.bind((host, port))
     s1.listen(5)
     
     # Kendi ip ve port bilgilerini client alıyor, bunları karşı tarafa atıcak
-    ip = "192.168.0.29"
-    #ip = str(sys.argv[1])
+    #ip = "192.168.0.29"
+    ip = str(sys.argv[1])
     #print("Main IP", str(ip))
-    #port = int(sys.argv[2])
+    port = int(sys.argv[2])
 
     # Kullanıcı kayıtlarının tutulacağı dictionary
     # write_dictionary ile text dosyası çağırılıp önceki kayıtlar dictionary içerisine yazılıyor
