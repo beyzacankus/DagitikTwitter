@@ -9,6 +9,7 @@ import uuid
 from pathlib import Path
 from itertools import islice
 from datetime import datetime
+import copy
 
 def take(n, iterable):
     "Return first n items of the iterable as a list"
@@ -173,5 +174,10 @@ def mergeTwoDict(ourDict, otherDict):
 
 
 def timestamptodate(user_dict):
+    return_dict = copy.deepcopy(user_dict)
+    #Python yapısı gereği variableA = variableB yaptığımız zaman uyguladığımız değişiklikleri diğer değişkenede uygulayan bir dil (bellek pointer yapısı gibi )
+    #Bu nedenle copy modülü kullanılarak o değişkenin içeriği kopyalayıp değişiklerden etkilenmemesini sağlıyoruz.
     for key in user_dict:
-        user_dict[key]['last_login'] = datetime.utcfromtimestamp(user_dict[key]['last_login']).strftime("%m/%d/%Y %H:%M:%S")
+        return_dict[key]['last_login'] = datetime.utcfromtimestamp(return_dict[key]['last_login']).strftime("%m/%d/%Y %H:%M:%S")
+
+    return return_dict
