@@ -39,12 +39,14 @@ class clientThread(threading.Thread): #Bu client aracı için çalıştığında
     def run(self):
         log = "Aracı client çalışmaya başladı.\n"
         self.logq.put(log)
+        print(log)
 
         while True:
-            while not clientSenderQueue.empty():
+            if (clientSenderQueue.empty() == False):
                 data_dict = clientSenderQueue.get()
                 client_sender_thread = clientSender(self.logq, data_dict)
                 client_sender_thread.start()
+                print("Araci sender çalıştı")
 
 
 def list_control(peer_dict, logq, my_ip, my_port, my_uuid,): #bu kod içerisinde time sleep olduğu için bunu çağıracak thread in başka işi olduğunda bekleme yapıyor
@@ -162,22 +164,24 @@ class serverThread(threading.Thread):
             flag = 1
             c_uuid = ""
             while True:
-                print("Recv Server\n")
+
                 try:
+                    print("Recv Server\n")
                     rps = c.recv(1024).decode()
-                    data_dict = parser(rps, "araci")
                     data_rcv = inc_parser_server(rps, self.my_uuid, "araci", self.logq, self.peer_dict,
-                                             flag, clientSenderQueue, clientReaderQueue, self.pub_key ,c)
+                                                 flag, clientSenderQueue, clientReaderQueue, self.pub_key ,c)
                     data = parser(data_rcv, "araci")
-                    print(data)
                     data_rcv += "\n"
-                    if(data_rcv):
+                    print(data)
+                    if(data['status'] == "OK"):
                         c.send(data_rcv.encode())
+                    else:
+                        break
                 except Exception as e:
-                    log = "Soket hatası\n" + str(e)
+                    log = "Server Thread Exception -- " + str(e)
                     self.logq.put(log)
                     print(log)
-                    break
+
 
                 """
                 # Bağlanıldı mesajı
@@ -265,14 +269,16 @@ def main():
     # Server için soket bağlantıları
     s1 = socket.socket()
     host = "0.0.0.0"
-    port = int(sys.argv[2])
+    port = 4565
+    #port = int(sys.argv[2])
     s1.bind((host, port))
     s1.listen(5)
     
     # Kendi ip ve port bilgilerini client alıyor, bunları karşı tarafa atıcak
-    ip = str(sys.argv[1])
+    ip = "192.168.0.29"
+    #ip = str(sys.argv[1])
     #print("Main IP", str(ip))
-    port = int(sys.argv[2])
+    #port = int(sys.argv[2])
 
     # Kullanıcı kayıtlarının tutulacağı dictionary
     # write_dictionary ile text dosyası çağırılıp önceki kayıtlar dictionary içerisine yazılıyor
