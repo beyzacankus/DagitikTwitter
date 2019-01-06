@@ -275,8 +275,8 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
         elif(data_dict['cmd'] == list):
 
             if flag == 1:
-                timestamptodate(user_dict)
-                data = data_dict['resp'] + " " + str(user_dict)
+                return_dict = timestamptodate(user_dict)
+                data = data_dict['resp'] + " " + str(return_dict)
             else:
                 data = "AUTH"
 
@@ -296,7 +296,6 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
         soket.send(str(data_dict['resp']).encode())
         logq.put(data_dict)
         soket.close()
-
     return data
 
 def out_parser_client(data, type, my_pub_key, clientSenderQueue, clientReaderQueue):
