@@ -110,7 +110,7 @@ class clientSender(threading.Thread):
             client_reader.start()
 
         except Exception as e:
-            log = "client sender - " + self.counter + " hata - " + str(e)
+            log = "client sender - " + str(self.counter) + " hata - " + str(e)
             self.logq.put(log)
             print(log)
 
