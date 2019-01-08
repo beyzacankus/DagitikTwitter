@@ -36,6 +36,8 @@ omesaj = "PRIV"
 mesajok = "PRIO"
 parametre = "ERRP"
 genelhata = "ERRG"
+authhata = "AUTH"
+engelhatası = "BLCK"
 
 
 #types, parser fonksiyonunu çağıran aracı mı ? yayıncı mı ? bunu bilmemiz gerekiyor.
@@ -310,14 +312,31 @@ def inc_parser_client(data, type, server_dict, pubkey_dict, clientReaderQueue, c
             mergeTwoDict(server_dict, list)     # server_dict'e gelen dict ekleniyor
             log = "Gelen peer listesi asıl listeye eklendi"
             logq.put(log)
-            appendToDictionaryFile(server_dict, logq, type, (type + "_peer_dict"))
+            appendToDictionaryFile(server_dict, logq, type, "_peer_dict")
             print("Peerdan alınan liste sözlüğe eklendi\n")
 
         elif(data['cmd'] == pubkeygeldi):
             #gelen pub_key i alacak server_dict te ekleyecek fonksiyon
             cuuid = data['data_dict']['cuuid']
-            pubkey_dict['cuuid'] = data['spubkey']
-            appendToDictionaryFile(pubkey_dict, logq, type, "pubkey_dict.txt")
+            pubkey_dict[cuuid] = data['spubkey']
+            appendToDictionaryFile(pubkey_dict, logq, type, "_pubkey_dict.txt")
+
+        elif (data['cmd'] == microblogokey):
+            pass
+        elif (data['cmd'] == aboneoldun):
+            pass
+        elif (data['cmd'] == aboneliktenciktin):
+            pass
+        elif (data['cmd'] == tweetokey):
+            pass
+        elif (data['cmd'] == ubanok):
+            pass
+        elif (data['cmd'] == mesajok):
+            pass
+        elif (data['cmd'] == authhata):
+            pass
+        elif (data['cmd'] == engelhatası):
+            pass
 
     return 1
 
