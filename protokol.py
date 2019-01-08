@@ -302,21 +302,21 @@ def out_parser_client(data, type, my_pub_key, clientSenderQueue, clientReaderQue
 
     return 1
 
-def inc_parser_client(data, type, server_dict, clientreaderqueue):
+def inc_parser_client(data, type, server_dict, pubkey_dict, clientReaderQueue, clientSenderQueue, logq):
 
-    data_dict = parser(data, type)
-    if (data_dict['status'] == "OK"):
-        if (data_dict['cmd'] == listo):
+    if (data['status'] == "OK"):
+        if (data['cmd'] == listo):
+            list = data["list"]     # Parametre olarak gelen dict alınıyor
+            mergeTwoDict(server_dict, list)     # server_dict'e gelen dict ekleniyor
+            log = "Gelen peer listesi asıl listeye eklendi"
+            logq.put(log)
+            appendToDictionaryFile(server_dict, logq, type, (type + "_peer_dict"))
+            print("Peerdan alınan liste sözlüğe eklendi\n")
 
-            #dict karşılaştırma fonksiyonu burada çağrılacak
-
-            #data_dict['list']
-            print("")
-
-        elif(data_dict['cmd'] == pubkeygeldi):
+        elif(data['cmd'] == pubkeygeldi):
             #gelen pub_key i alacak server_dict te ekleyecek fonksiyon
-
-            clientreaderqueue.put(data_dict)
+            cuuid = data['data_dict']['cuuid']
+            pubkey_dict['cuuid'] = data['spubkey']
 
     return 1
 
