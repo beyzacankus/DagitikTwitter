@@ -1,0 +1,46 @@
+-----------------------------------
+Logger starting.
+-----------------------------------
+Logger starting.
+Mon Dec 31 21:32:30 2018 - aracidosyadan kayıtları çekti.
+
+Mon Dec 31 21:32:41 2018 - Aracı client çalışmaya başladı.
+
+Mon Dec 31 21:32:41 2018 - Got connection from ('192.168.198.136', 33010)
+Mon Dec 31 21:32:41 2018 - Aracı Server Thread çalışmaya başladı.
+
+-----------------------------------
+Logger starting.
+Mon Dec 31 21:45:06 2018 - aracidosyadan kayıtları çekti.
+
+-----------------------------------
+Logger starting.
+Mon Dec 31 21:46:10 2018 - aracidosyadan kayıtları çekti.
+
+-----------------------------------
+Logger starting.
+Mon Dec 31 21:51:33 2018 - aracidosyadan kayıtları çekti.
+
+Mon Dec 31 21:51:38 2018 - Aracı client çalışmaya başladı.
+
+Mon Dec 31 21:51:38 2018 - Got connection from ('192.168.198.136', 33518)
+Mon Dec 31 21:51:38 2018 - Aracı Server Thread çalışmaya başladı.
+
+-----------------------------------
+Logger starting.
+Mon Dec 31 21:52:39 2018 - aracidosyadan kayıtları çekti.
+
+Mon Dec 31 21:52:45 2018 - Aracı client çalışmaya başladı.
+
+Mon Dec 31 21:52:45 2018 - Got connection from ('192.168.198.136', 33038)
+Mon Dec 31 21:52:45 2018 - Aracı Server Thread çalışmaya başladı.
+
+-----------------------------------
+Logger starting.
+Tue Jan  8 15:53:11 2019 - aracidosyadan kayıtları çekti.
+
+Tue Jan  8 15:53:19 2019 - Aracı client çalışmaya başladı.
+
+Tue Jan  8 15:53:34 2019 - Got connection from ('192.168.198.136', 56200)
+Tue Jan  8 15:53:34 2019 - Aracı Server Thread çalışmaya başladı.
+
