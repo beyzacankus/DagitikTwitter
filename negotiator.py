@@ -41,11 +41,14 @@ class clientThread(threading.Thread): #Bu client aracı için çalıştığında
         self.logq.put(log)
         print(log)
 
+        # clientReader ve clientSender'ı isimlendirmek icin
+        counter = 0
         while True:
             if (clientSenderQueue.empty() == False):
                 data_dict = clientSenderQueue.get()
-                client_sender_thread = clientSender(self.logq, data_dict)
+                client_sender_thread = clientSender("Client Sender - "+ str(counter), self.logq, data_dict, counter)
                 client_sender_thread.start()
+                counter += 1
                 print("Araci sender çalıştı")
 
 
@@ -77,13 +80,15 @@ def list_control(peer_dict, logq, my_ip, my_port, my_uuid,): #bu kod içerisinde
 
 # Client için sender thread
 class clientSender(threading.Thread):
-    def __init__(self, logq, data_dict):
+    def __init__(self, name, logq, data_dict, counter):
         threading.Thread.__init__(self)
+        self.name = name
         self.logq = logq
         self.data_dict = data_dict
+        self.counter = counter
 
     def run(self):
-        log = "Aracı Client Sender Thread çalışmaya başladı.\n"
+        log = tip + name + "thread çalışmaya başladı.\n"
         self.logq.put(log)
         try: #senderqueue dan gelen soket kontrolü
             data = self.data_dict
@@ -102,7 +107,7 @@ class clientSender(threading.Thread):
                 'data_dict': data['data_dict']
             }
             clientReaderQueue.put(command)
-            client_reader = clientReader(self.logq)
+            client_reader = clientReader("Client Reader - " + str(counter), self.logq)
             client_reader.start()
 
         except Exception as e:
@@ -111,12 +116,13 @@ class clientSender(threading.Thread):
             print(log)
 
 class clientReader(threading.Thread):
-    def __init__(self, logq):
+    def __init__(self, name, logq):
         threading.Thread.__init__(self)
+        self.name = name
         self.logq = logq
 
     def run(self):
-        log = "Aracı Client Reader Thread çalışmaya başladı.\n"
+        log = tip + name + "thread çalışmaya başladı.\n"
         self.logq.put(log)
         print(log)
 
