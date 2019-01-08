@@ -31,9 +31,10 @@ def Write_Read_RSAKeys(publicKey, privateKey,logq): #RSA keylerini dosyaya yazan
     privKey_file = Path("./my_privKey.txt")
 
     if pubKey_file.is_file():
-        fid_pub = open(pubKey_file, "r+")
+        file = open(pubKey_file, "r+")
+        fid_pub = file.read()
         keys_dict = {
-            "pubKey": fid_pub.read()
+            "pubKey": RSA.import_key(fid_pub)
         }
     else:
         fid_pub = open(pubKey_file, "w")
@@ -43,8 +44,9 @@ def Write_Read_RSAKeys(publicKey, privateKey,logq): #RSA keylerini dosyaya yazan
         }
         logq.put("PublicKey oluşturuldu, dosyaya yazıldı.")
     if privKey_file.is_file():
-        fid_priv = open(privKey_file, "r+")
-        keys_dict['privKey'] = fid_priv.read()
+        file = open(privKey_file, "r+")
+        fid_priv = file.read()
+        keys_dict['privKey'] = RSA.import_key(fid_priv)
 
     else:
         fid_priv = open(privKey_file, "w")
