@@ -134,6 +134,10 @@ class clientReader(threading.Thread):
                 clientToServerQueue.put(data)
                 client_toserver = clientToServer(self.logq)
                 client_toserver.start()
+            elif(data['cmd'] == "WAIT"):
+                log = "Waiting for HELO connection."
+                self.logq.put(log)
+                print(log)
             else:
                 print("farklı protokol")
                 #inc_parser_client(data, tip, server_dict, )
