@@ -20,7 +20,6 @@ serverSenderQueue = queue.Queue()
 serverReaderQueue = queue.Queue()
 
 tip = "araci"
-
 server_dict = readFromDictionaryFile(logQueue, "araci", "_peer_dictionary.txt")
 #  Bir peer icin hem client hem de server var.
 
@@ -88,7 +87,7 @@ class clientSender(threading.Thread):
         self.counter = counter
 
     def run(self):
-        log = tip + name + "thread çalışmaya başladı.\n"
+        log = tip + self.name + "thread çalışmaya başladı.\n"
         self.logq.put(log)
         try: #senderqueue dan gelen soket kontrolü
             data = self.data_dict
@@ -107,11 +106,11 @@ class clientSender(threading.Thread):
                 'data_dict': data['data_dict']
             }
             clientReaderQueue.put(command)
-            client_reader = clientReader("Client Reader - " + str(counter), self.logq)
+            client_reader = clientReader("Client Reader - " + str(self.counter), self.logq)
             client_reader.start()
 
         except Exception as e:
-            log = "client sender - " + counter + " hata - " + str(e)
+            log = "client sender - " + self.counter + " hata - " + str(e)
             self.logq.put(log)
             print(log)
 
@@ -122,7 +121,7 @@ class clientReader(threading.Thread):
         self.logq = logq
 
     def run(self):
-        log = tip + name + "thread çalışmaya başladı.\n"
+        log = tip + self.name + "thread çalışmaya başladı.\n"
         self.logq.put(log)
         print(log)
 
@@ -180,7 +179,7 @@ class serverThread(threading.Thread):
         self.name = name
 
     def run(self):
-        log = tip + name + " çalışmaya başladı.\n"
+        log = tip + self.name + " çalışmaya başladı.\n"
         self.logq.put(log)
 
         while not serverReaderQueue.empty():
@@ -207,7 +206,7 @@ class serverThread(threading.Thread):
                     else:
                         break
                 except Exception as e:
-                    log = name + " got Exception -- " + str(e)
+                    log = self.name + " got Exception -- " + str(e)
                     self.logq.put(log)
                     print(log)
 
@@ -259,7 +258,7 @@ class clientToServer(threading.Thread):
         self.logq = logq
 
     def run(self):
-        log = tip + name + " thread çalışmaya başladı.\n"
+        log = tip + self.name + " thread çalışmaya başladı.\n"
         self.logq.put(log)
         print(log)
 
