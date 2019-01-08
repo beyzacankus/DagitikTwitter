@@ -167,7 +167,7 @@ def mergeTwoDict(ourDict, otherDict):
     for ourKey in ourDict.keys():
         for otherKey in otherDict.keys():
             if ourKey == otherKey:
-                if ourDict[ourKey]["timestamp"] < otherDict[otherKey]["timestamp"]: # timestamp'i time.time() olarak denedim float donduruyor
+                if ourDict[ourKey]["last_login"] < otherDict[otherKey]["last_login"]: # timestamp'i time.time() olarak denedim float donduruyor
                     ourDict[ourKey] = otherDict[otherKey]
     # ikinci for bizde olmayan itemleri almak icin
     for otherKey in otherDict.keys():

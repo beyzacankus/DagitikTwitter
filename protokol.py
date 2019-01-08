@@ -263,6 +263,7 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
             else: #WAIT burada göndereliyor ancak ekleme yapmak için client threadinin SUID kontrolünün sonucunu beklemek gerekiyor.
                 data = data_dict['resp1']
                 command = {
+                    'server_flag': "1",
                     'ip':data_dict['cip'],
                     'port':data_dict['cport'],
                     'cmd':"SUID",
