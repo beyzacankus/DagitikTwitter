@@ -138,6 +138,16 @@ class clientReader(threading.Thread):
                 log = "Waiting for HELO connection."
                 self.logq.put(log)
                 print(log)
+                msg = skt.recv(1024).decode()
+                data = parser(msg, "A")
+            elif(data['cmd'] == "WLCM"):
+                log = "WLCM received"
+                self.logq.put(log)
+                print(log)
+                skt.send(("LIST").encode())
+                msg = skt.recv(1024).decode()
+                data = parser(msg, "A")
+
             else:
                 print("farklı protokol")
                 #inc_parser_client(data, tip, server_dict, )
