@@ -21,7 +21,8 @@ serverReaderQueue = queue.Queue()
 
 tip = "yayinci"
 server_dict = readFromDictionaryFile(logQueue, tip, "_peer_dictionary.txt")
-
+pubkey_dict = readFromDictionaryFile(logQueue, tip, "_pubkey_dict.txt")
+fallow_list = readFromDictionaryFile(logQueue, tip, "_fallow_list.txt")
 
 #  Bir peer icin hem client hem de server var.
 
