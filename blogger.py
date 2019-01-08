@@ -163,7 +163,7 @@ class clientReader(threading.Thread):
             skt = data_queue['skt']
             msg = skt.recv(1024).decode()
             print(msg)
-            data = parser(msg, "A")
+            data = parser(msg, "Y")
             if (data_queue['server_flag'] == "1"):
                 data['server_soket'] = data_queue['server_soket']
                 data['data_dict'] = data_queue['data_dict']
@@ -179,14 +179,14 @@ class clientReader(threading.Thread):
                 self.logq.put(log)
                 print(log)
                 msg = skt.recv(1024).decode()
-                data = parser(msg, "A")
+                data = parser(msg, "Y")
             if (data['cmd'] == "WLCM"):
                 log = "WLCM received"
                 self.logq.put(log)
                 print(log)
                 skt.send(("LIST\r\n").encode())
                 msg = skt.recv(1024).decode()
-                data = parser(msg, "A")
+                data = parser(msg, "Y")
             if (data['cmd'] == "LSTO"):
                 list = eval(data["list"])  # Parametre olarak gelen dict alınıyor
                 mergeTwoDict(server_dict, list)  # server_dict'e gelen dict ekleniyor
