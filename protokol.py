@@ -37,7 +37,7 @@ mesajok = "PRIO"
 parametre = "ERRP"
 genelhata = "ERRG"
 authhata = "AUTH"
-engelhatası = "BLCK"
+engelhatasi = "BLCK"
 
 
 #types, parser fonksiyonunu çağıran aracı mı ? yayıncı mı ? bunu bilmemiz gerekiyor.
@@ -334,9 +334,6 @@ def inc_parser_client(data, type, server_dict, pubkey_dict, clientReaderQueue, c
         elif (data['cmd'] == mesajok):
             pass
         elif (data['cmd'] == authhata):
-            pass
-        elif (data['cmd'] == engelhatası):
-            pass
 
     return 1
 
