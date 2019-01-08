@@ -111,7 +111,7 @@ class clientSender(threading.Thread):
             client_reader.start()
 
         except Exception as e:
-            log = "client sender hata - " + str(e)
+            log = "client sender - " + counter + " hata - " + str(e)
             self.logq.put(log)
             print(log)
 
@@ -126,6 +126,7 @@ class clientReader(threading.Thread):
         self.logq.put(log)
         print(log)
 
+        csCounter = 0
         while not clientReaderQueue.empty():
             data_queue = clientReaderQueue.get()
             skt = data_queue['skt']
@@ -138,8 +139,9 @@ class clientReader(threading.Thread):
 
             if(data['cmd'] == "AUID"):
                 clientToServerQueue.put(data)
-                client_toserver = clientToServer(self.logq)
+                client_toserver = clientToServer("Client to Server - " + str(csCounter), self.logq)
                 client_toserver.start()
+                csCounter += 1
             elif(data['cmd'] == "WAIT"):
                 log = "Waiting for HELO connection."
                 self.logq.put(log)
@@ -169,15 +171,16 @@ class clientReader(threading.Thread):
 
 # Server için thread
 class serverThread(threading.Thread):
-    def __init__(self, logq, peer_dict, my_uuid, pub_key):
+    def __init__(self, name, logq, peer_dict, my_uuid, pub_key):
         threading.Thread.__init__(self)
         self.pub_key = pub_key
         self.logq = logq
         self.my_uuid = my_uuid
         self.peer_dict = peer_dict # uuid ve baglanti adreslerinin oldugu dictionary
+        self.name = name
 
     def run(self):
-        log = "Aracı Server Thread çalışmaya başladı.\n"
+        log = tip + name + " çalışmaya başladı.\n"
         self.logq.put(log)
 
         while not serverReaderQueue.empty():
@@ -204,7 +207,7 @@ class serverThread(threading.Thread):
                     else:
                         break
                 except Exception as e:
-                    log = "Server Thread Exception -- " + str(e)
+                    log = name + " got Exception -- " + str(e)
                     self.logq.put(log)
                     print(log)
 
@@ -250,12 +253,13 @@ class serverThread(threading.Thread):
 
 
 class clientToServer(threading.Thread):
-    def __init__(self, logq):
+    def __init__(self, name, logq):
         threading.Thread.__init__(self)
+        self.name = name
         self.logq = logq
 
     def run(self):
-        log = "Aracı Client To Server Thread çalışmaya başladı.\n"
+        log = tip + name + " thread çalışmaya başladı.\n"
         self.logq.put(log)
         print(log)
 
@@ -334,7 +338,9 @@ def main():
 
     client_thread = clientThread(server_dict, clientSenderQueue, clientReaderQueue, logQueue, ip, port, my_uuid)
     client_thread.start()
-
+    
+    # server name icin
+    serverCounter = 0
     while True:
         c, addr = s1.accept()
         gelen_soket = {
@@ -344,8 +350,9 @@ def main():
         #print(addr[1])
         serverReaderQueue.put(gelen_soket)
         logQueue.put('Got connection from ' + str(addr))
-        server_thread = serverThread(logQueue, server_dict, my_uuid, public_key)
+        server_thread = serverThread("Server Thread - " + str(serverCounter), logQueue, server_dict, my_uuid, public_key)
         server_thread.start()
+        serverCounter += 1
 
 
 if __name__ == '__main__':
