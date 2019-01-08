@@ -317,6 +317,7 @@ def inc_parser_client(data, type, server_dict, pubkey_dict, clientReaderQueue, c
             #gelen pub_key i alacak server_dict te ekleyecek fonksiyon
             cuuid = data['data_dict']['cuuid']
             pubkey_dict['cuuid'] = data['spubkey']
+            appendToDictionaryFile(pubkey_dict, logq, type, "pubkey_dict.txt")
 
     return 1
 
