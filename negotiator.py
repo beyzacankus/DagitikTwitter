@@ -106,7 +106,7 @@ class clientSender(threading.Thread):
         self.counter = counter
 
     def run(self):
-        log = tip + self.name + "thread çalışmaya başladı.\n"
+        log = tip + " " + self.name + "thread çalışmaya başladı.\n"
         self.logq.put(log)
         try: #senderqueue dan gelen soket kontrolü
             data = self.data_dict
@@ -143,7 +143,7 @@ class clientReader(threading.Thread):
         self.logq = logq
 
     def run(self):
-        log = tip + self.name + "thread çalışmaya başladı.\n"
+        log = tip + " " + self.name + " thread çalışmaya başladı.\n"
         self.logq.put(log)
         print(log)
 
@@ -202,7 +202,7 @@ class serverThread(threading.Thread):
         self.name = name
 
     def run(self):
-        log = tip + self.name + " çalışmaya başladı.\n"
+        log = tip + " " + self.name + " çalışmaya başladı.\n"
         self.logq.put(log)
 
         while not serverReaderQueue.empty():
@@ -241,7 +241,7 @@ class clientToServer(threading.Thread):
         self.logq = logq
 
     def run(self):
-        log = tip + self.name + " thread çalışmaya başladı.\n"
+        log = tip + " " + self.name + " thread çalışmaya başladı.\n"
         self.logq.put(log)
         print(log)
 
