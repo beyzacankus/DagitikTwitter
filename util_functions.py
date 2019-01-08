@@ -38,7 +38,7 @@ def Write_Read_RSAKeys(publicKey, privateKey,logq): #RSA keylerini dosyaya yazan
         }
     else:
         fid_pub = open(pubKey_file, "w")
-        fid_pub.write(publicKey)
+        fid_pub.write(publicKey.decode())
         keys_dict = {
             "pubKey": publicKey
         }
@@ -50,7 +50,7 @@ def Write_Read_RSAKeys(publicKey, privateKey,logq): #RSA keylerini dosyaya yazan
 
     else:
         fid_priv = open(privKey_file, "w")
-        fid_priv.write(privateKey)
+        fid_priv.write(privateKey.decode())
         keys_dict['privKey'] = privateKey
 
         logq.put("PrivateKey oluşturuldu, dosyaya yazıldı.")
