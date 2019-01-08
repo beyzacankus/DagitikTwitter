@@ -153,7 +153,13 @@ class clientReader(threading.Thread):
                 skt.send(("LIST").encode())
                 msg = skt.recv(1024).decode()
                 data = parser(msg, "A")
-
+            elif(data['cmd'] == "LSTO"):
+                list = data[ "list" ]  # Parametre olarak gelen dict alınıyor
+                mergeTwoDict(server_dict, list)  # server_dict'e gelen dict ekleniyor
+                log = "Gelen peer listesi asıl listeye eklendi"
+                self.logq.put(log)
+                appendToDictionaryFile(server_dict, self.logq, type, "_peer_dict")
+                print("Peerdan alınan liste sözlüğe eklendi\n")
             else:
                 print("farklı protokol")
                 #inc_parser_client(data, tip, server_dict, )
