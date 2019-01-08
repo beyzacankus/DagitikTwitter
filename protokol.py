@@ -304,7 +304,7 @@ def out_parser_client(data, type, my_pub_key, clientSenderQueue, clientReaderQue
 
     return 1
 
-def inc_parser_client(data, type, server_dict, pubkey_dict, clientReaderQueue, clientSenderQueue, logq):
+def inc_parser_client(data, type, server_dict, fallow_list,pubkey_dict, clientReaderQueue, clientSenderQueue, logq):
 
     if (data['status'] == "OK"):
         if (data['cmd'] == listo):
@@ -324,9 +324,21 @@ def inc_parser_client(data, type, server_dict, pubkey_dict, clientReaderQueue, c
         elif (data['cmd'] == microblogokey):
             pass
         elif (data['cmd'] == aboneoldun):
-            pass
+            cuuid = data['data_dict']['cuuid']
+            fallow_list.append(cuuid)
+
+            log = "Abonelik işlemi başarıyla gerçekleşti\n"
+            logq.put(log)
+            print("Abonelik işlemi başarıyla gerçekleşti\n")
+
         elif (data['cmd'] == aboneliktenciktin):
-            pass
+            cuuid = data['data_dict']['cuuid']
+            fallow_list.remove(cuuid)
+
+            log = "Abonelikten çıkma işlemi başarıyla gerçekleşti\n"
+            logq.put(log)
+            print("Abonelikten çıkma işlemi başarıyla gerçekleşti\n")
+
         elif (data['cmd'] == tweetokey):
             pass
         elif (data['cmd'] == ubanok):
@@ -334,6 +346,41 @@ def inc_parser_client(data, type, server_dict, pubkey_dict, clientReaderQueue, c
         elif (data['cmd'] == mesajok):
             pass
         elif (data['cmd'] == authhata):
+            soket = data['server_soket']
+
+            log = "AUTH hatası! Soket kapatıldı.\n"
+            logq.put(log)
+            print("AUTH hatası! Soket kapatıldı.\n")
+
+            soket.close()
+
+        elif (data['cmd'] == engelhatasi):
+            soket = data['server_soket']
+
+            log = "BLCK hatası! Soket kapatıldı.\n"
+            logq.put(log)
+            print("BLCK hatası! Soket kapatıldı.\n")
+
+            soket.close()
+        elif (data['cmd'] == parametre):
+            soket = data['server_soket']
+
+            log = "ERRP hatası! Soket kapatıldı.\n"
+            logq.put(log)
+            print("ERRP hatası! Soket kapatıldı.\n")
+
+            soket.close()
+
+        elif (data['cmd'] == genelhata):
+            soket = data['server_soket']
+
+            log = "ERRG hatası! Soket kapatıldı.\n"
+            logq.put(log)
+            print("ERRG hatası! Soket kapatıldı.\n")
+
+            soket.close()
+
+
 
     return 1
 
