@@ -293,8 +293,8 @@ def main():
     keys = create_rsa_key(my_uuid)
     private_key = my_uuid + "_private_key"
     public_key = my_uuid + "_public_key"
-    private_key = keys[private_key].exportKey().decode()
-    public_key = keys[public_key].exportKey().decode()
+    private_key = keys[private_key].exportKey()
+    public_key = keys[public_key].exportKey()
 
     rsa_keys = Write_Read_RSAKeys(public_key, private_key, logQueue)
     private_key = rsa_keys['privKey']
