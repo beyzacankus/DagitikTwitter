@@ -198,7 +198,7 @@ class clientReader(threading.Thread):
             else:
                 print("farklı protokol")
                 # inc_parser_client(data, tip, server_dict, )
-                inc_parser_client(data, tip, server_dict,fallow_list, pubkey_dict, clientReaderQueue, clientSenderQueue)
+                inc_parser_client(data, tip, server_dict,fallow_list, pubkey_dict, clientReaderQueue, clientSenderQueue, self.logq)
                 # inc_parser_client(msg, "A", clientReaderQueue)
 
 
