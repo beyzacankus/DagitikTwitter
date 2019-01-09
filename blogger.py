@@ -194,7 +194,7 @@ class clientReader(threading.Thread):
                 self.logq.put(log)
                 appendToDictionaryFile(server_dict, self.logq, tip, "_peer_dictionary.txt")
                 print("Peerdan alınan liste sözlüğe eklendi\n")
-
+                print(server_dict)
             else:
                 print("farklı protokol")
                 # inc_parser_client(data, tip, server_dict, )
@@ -270,7 +270,9 @@ class clientToServer(threading.Thread):
                         "cport": data_dict['cport'],
                         "ctype": data_dict["ctype"],
                         "cnick": data_dict["cnick"],
-                        "last_login": time.ctime(time.time()),
+                        "last_login": datetime.utcfromtimestamp(time.time()).strftime("%m/%d/%Y %H:%M:%S"),
+
+
                     # time değeri float cinsinde atılıyor. Bu değeri datetime cinsine dönüştürmek için datetime.datetime.fromtimestamp(x) fonksiyonu verilmeli ve x yerine float değer yazılmalı
                         # pubkey eklenecek
                     }

@@ -259,7 +259,8 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
                 data = data_dict['resp2'] + " " + data_dict['cuuid']
                 user_dict[data_dict['cuuid']]['cip'] = data_dict['cip']
                 user_dict[data_dict['cuuid']]['cport'] = data_dict['cport']
-                user_dict[data_dict['cuuid']]['last_login'] = time.time()
+                user_dict[data_dict['cuuid']]['last_login'] = datetime.utcfromtimestamp(time.time()).strftime("%m/%d/%Y %H:%M:%S")
+
                 appendToDictionaryFile(user_dict, logq, "araci", "_peer_dictionary.txt")
                 #eğer uuid var ve ip-port farklı ise güncelle sonra welcome dön
                 #gelen_port
@@ -282,8 +283,8 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
         elif(data_dict['cmd'] == list):
 
             if flag == 1:
-                return_dict = timestamptodate(user_dict)
-                data = data_dict['resp'] + " " + str(return_dict)
+#                return_dict = timestamptodate(user_dict)
+                data = data_dict['resp'] + " " + str(user_dict)
             else:
                 data = "AUTH"
 
