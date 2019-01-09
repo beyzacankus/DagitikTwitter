@@ -247,7 +247,11 @@ def parser(data, type): #AUTH ve BLCK hataları ana kod içerisinde yazılacak
 
 def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueue, clientreaderqueue, public_key, soket):
 
-    data_dict = parser(data,type)
+    if (type == "araci"):
+        tip = araci
+    else:
+        tip = yayinci
+    data_dict = parser(data,tip)
     data = ""
     if(data_dict['status'] == "OK"):
         if(data_dict['cmd'] == merhaba):

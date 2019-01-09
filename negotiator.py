@@ -221,7 +221,7 @@ class serverThread(threading.Thread):
                     rps = c.recv(1024).decode()
                     data_rcv = inc_parser_server(rps, self.my_uuid, "araci", self.logq, self.peer_dict,
                                                  flag, clientSenderQueue, clientReaderQueue, self.pub_key ,c)
-                    data = parser(data_rcv, "araci")
+                    data = parser(data_rcv, "A")
                     data_rcv += "\n"
                     print(rps)
                     if(data['status'] == "OK"):
