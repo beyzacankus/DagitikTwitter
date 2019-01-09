@@ -99,8 +99,7 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
                 "list": data[ 5: ]
             }
 
-        elif (
-                command == pubkeygeldi):  # cpubkey ile gelen pubkey i alıyoruz. gönderim yaparken kendi pubkey imizi göndereceğiz.
+        elif (command == pubkeygeldi):  # cpubkey ile gelen pubkey i alıyoruz. gönderim yaparken kendi pubkey imizi göndereceğiz.
             if (type == yayinci):
                 rdict = {
                     "status": "OK",
@@ -308,7 +307,10 @@ def inc_parser_server(data, suuid, type, logq, user_dict, clientsenderqueue, cli
             else:
                 data = "AUTH"
     else:
-        data = data_dict[ 'resp' ]
+        if(data_dict[ 'resp' ]):
+            data = data_dict['resp']
+        else:
+            data = "ERRG" # status NOK olması durumunda eğer resp hata mesajı yoksa ERRG göndeririz (aracının yayıncı komutlarını istemesi gibi)
         logq.put(data_dict)
     return data
 
