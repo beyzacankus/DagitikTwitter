@@ -28,7 +28,7 @@ fallow_list = readFromDictionaryFile(logQueue, tip, "_fallow_list.txt")
 
 #  Peer'in client tarafi tanimlaniyor.
 class clientThread(
-    threading.Thread):  # Bu client aracı için çalıştığında kendi listsinde olan herkesten gidip liste ister
+    threading.Thread):  # Bu client yayinci için çalıştığında kendi listsinde olan herkesten gidip liste ister
     def __init__(self, server_dict, clientSenderQueue, clientReaderQueue, logq, ip, port, c_uuid):
         threading.Thread.__init__(self)
         self.clientReaderQueue = clientReaderQueue
@@ -89,7 +89,7 @@ def list_control(peer_dict, logq, my_ip, my_port,
 
             msg = "HELO " + str(my_uuid) + " " + str(my_ip) + " " + str(my_port) + " " + str(tip) + " " + str(
                 tip + "" + str(
-                    my_uuid))  # Burada araci kendi ipsini ve server taradinin portunu yolluyor. Nick de aracida onemli olmadigi icin bos.
+                    my_uuid))  # Burada yayıncı kendi ipsini ve server taradinin portunu yolluyor. Nick de aracida onemli olmadigi icin bos.
             sender_dict = {
                 'server_flag': "0",
                 'ip': ip,
@@ -174,20 +174,20 @@ class clientReader(threading.Thread):
                 client_toserver = clientToServer("Client to Server - " + str(csCounter), self.logq)
                 client_toserver.start()
                 csCounter += 1
-            elif (data['cmd'] == "WAIT"):
+            if (data['cmd'] == "WAIT"):
                 log = "Waiting for HELO connection."
                 self.logq.put(log)
                 print(log)
                 msg = skt.recv(1024).decode()
                 data = parser(msg, "Y")
-            elif (data['cmd'] == "WLCM"):
+            if (data['cmd'] == "WLCM"):
                 log = "WLCM received"
                 self.logq.put(log)
                 print(log)
                 skt.send(("LIST\r\n").encode())
                 msg = skt.recv(1024).decode()
                 data = parser(msg, "Y")
-            elif (data['cmd'] == "LSTO"):
+            if (data['cmd'] == "LSTO"):
                 list = eval(data["list"])  # Parametre olarak gelen dict alınıyor
                 mergeTwoDict(server_dict, list)  # server_dict'e gelen dict ekleniyor
                 log = "Gelen peer listesi asıl listeye eklendi"
@@ -198,7 +198,7 @@ class clientReader(threading.Thread):
             else:
                 print("farklı protokol")
                 # inc_parser_client(data, tip, server_dict, )
-                inc_parser_client(data, tip, server_dict,fallow_list, pubkey_dict, clientReaderQueue, clientSenderQueue)
+                inc_parser_client(data, tip, server_dict,fallow_list, pubkey_dict, clientReaderQueue, clientSenderQueue, self.logq)
                 # inc_parser_client(msg, "A", clientReaderQueue)
 
 
@@ -230,9 +230,9 @@ class serverThread(threading.Thread):
                 try:
                     print("Recv Server\n")
                     rps = c.recv(1024).decode()
-                    data_rcv = inc_parser_server(rps, self.my_uuid, "araci", self.logq, self.peer_dict,
+                    data_rcv = inc_parser_server(rps, self.my_uuid, "yayinci", self.logq, self.peer_dict,
                                                  flag, clientSenderQueue, clientReaderQueue, self.pub_key, c)
-                    data = parser(data_rcv, "araci")
+                    data = parser(data_rcv, "Y")
                     data_rcv += "\n"
                     print(rps)
                     if (data['status'] == "OK"):
@@ -275,7 +275,7 @@ class clientToServer(threading.Thread):
                         # pubkey eklenecek
                     }
                     server_dict[data_dict['cuuid']] = c_dict
-                    appendToDictionaryFile(server_dict, self.logq, "araci", "_peer_dictionary.txt")
+                    appendToDictionaryFile(server_dict, self.logq, "yayinci", "_peer_dictionary.txt")
                     data = data_dict['resp2'] + " " + data_dict['cuuid']
                     c.send(data.encode())
                     flag = 1
