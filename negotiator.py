@@ -206,9 +206,8 @@ class serverThread(threading.Thread):
         self.logq.put(log)
 
         while not serverReaderQueue.empty():
-            soket = serverReaderQueue.get()
-            c = soket['c']
-            addr = soket['addr']
+            c, addr = serverReaderQueue.get()
+            logQueue.put('Got connection from ' + str(addr))
             print(addr[0])
             print("Soket Server\n")
 
@@ -220,18 +219,21 @@ class serverThread(threading.Thread):
                     print("Recv Server\n")
                     rps = c.recv(1024).decode()
                     data_rcv = inc_parser_server(rps, self.my_uuid, "araci", self.logq, self.peer_dict,
-                                                clientSenderQueue, clientReaderQueue, self.pub_key ,soket)
+                                                clientSenderQueue, clientReaderQueue, self.pub_key ,c, addr)
                     data = parser(data_rcv, "A")
                     data_rcv += "\n"
                     print(rps)
                     if(data['status'] == "OK"):
                         c.send(data_rcv.encode())
                     else:
+                        c.send(data_rcv.encode())
+                        c.close()
                         break
                 except Exception as e:
                     log = self.name + " got Exception -- " + str(e)
                     self.logq.put(log)
                     print(log)
+                    break #hatalı durumlarda protokol.py içerisinde close
 
 
 class clientToServer(threading.Thread):
@@ -250,7 +252,8 @@ class clientToServer(threading.Thread):
             while not clientToServerQueue.empty():
                 reader_data = clientToServerQueue.get()  ##devamı gelecek.
                 print("reader data\n" + str(reader_data))
-                c = socket(reader_data[ 'server_soket' ])
+                c = reader_data['server_soket']
+                print("SERVER SOKET ----------- " + str(c))
                 data_dict = reader_data[ 'data_dict' ]
                 if ((reader_data[ 'cmd' ] == "AUID") and (reader_data['uuid'] == data_dict['cuuid'])):  # client reader queue dict yazılmış gibi değerlendirildi.
                     c_dict = {
@@ -326,14 +329,8 @@ def main():
     # server name icin
     serverCounter = 0
     while True:
-        c, addr = s1.accept()
-        gelen_soket = {
-            'c': c,
-            'addr': addr
-        }
-        #print(addr[1])
-        serverReaderQueue.put(gelen_soket)
-        logQueue.put('Got connection from ' + str(addr))
+
+        serverReaderQueue.put(s1.accept())
         server_thread = serverThread("Server Thread - " + str(serverCounter), logQueue, server_dict, my_uuid, public_key)
         server_thread.start()
         serverCounter += 1
