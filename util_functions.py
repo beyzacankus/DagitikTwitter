@@ -183,3 +183,15 @@ def timestamptodate(user_dict):
         return_dict[key]['last_login'] = datetime.utcfromtimestamp(return_dict[key]['last_login']).strftime("%m/%d/%Y %H:%M:%S")
 
     return return_dict
+
+def ispeer_valid(ip, user_dict):
+
+    flag = 0
+    for keys in user_dict:
+        if user_dict[keys ][ 'cip' ] == str(ip):
+            flag +=1
+
+    if flag > 0:
+        return True
+    else:
+        return False
