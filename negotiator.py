@@ -158,34 +158,36 @@ class clientReader(threading.Thread):
                 data['server_soket'] = data_queue['server_soket']
                 data['data_dict'] = data_queue['data_dict']
             print(data)
-
-            if(data['cmd'] == "AUID"):
-                clientToServerQueue.put(data)
-                client_toserver = clientToServer("Client to Server - " + str(csCounter), self.logq)
-                client_toserver.start()
-                csCounter += 1
-            if(data['cmd'] == "WAIT"):
-                log = "Waiting for HELO connection."
-                self.logq.put(log)
-                print(log)
-                msg = skt.recv(1024).decode()
-                data = parser(msg, "A")
-            if(data['cmd'] == "WLCM"):
-                log = "WLCM received"
-                self.logq.put(log)
-                print(log)
-                skt.send(("LIST\r\n").encode())
-                msg = skt.recv(1024).decode()
-                data = parser(msg, "A")
-            if(data['cmd'] == "LSTO"):
-                list = eval(data[ "list" ])  # Parametre olarak gelen dict alınıyor
-                mergeTwoDict(server_dict, list)  # server_dict'e gelen dict ekleniyor
-                log = "Gelen peer listesi asıl listeye eklendi"
-                self.logq.put(log)
-                appendToDictionaryFile(server_dict, self.logq, tip, "_peer_dictionary.txt")
-                print("Peerdan alınan liste sözlüğe eklendi\n")
-
-            print("farklı protokol")
+            if(data['cmd'] == "AUID" or data['cmd'] == "WAIT" or data['cmd'] == "WLCM" or data['cmd'] == "LSTO"):
+                if(data['cmd'] == "AUID"):
+                    clientToServerQueue.put(data)
+                    client_toserver = clientToServer("Client to Server - " + str(csCounter), self.logq)
+                    client_toserver.start()
+                    csCounter += 1
+                if(data['cmd'] == "WAIT"):
+                    log = "Waiting for HELO connection."
+                    self.logq.put(log)
+                    print(log)
+                    msg = skt.recv(1024).decode()
+                    data = parser(msg, "A")
+                if(data['cmd'] == "WLCM"):
+                    log = "WLCM received"
+                    self.logq.put(log)
+                    print(log)
+                    skt.send(("LIST\r\n").encode())
+                    msg = skt.recv(1024).decode()
+                    data = parser(msg, "A")
+                if(data['cmd'] == "LSTO"):
+                    list = eval(data[ "list" ])  # Parametre olarak gelen dict alınıyor
+                    mergeTwoDict(server_dict, list)  # server_dict'e gelen dict ekleniyor
+                    log = "Gelen peer listesi asıl listeye eklendi"
+                    self.logq.put(log)
+                    appendToDictionaryFile(server_dict, self.logq, tip, "_peer_dictionary.txt")
+                    print("Peerdan alınan liste sözlüğe eklendi\n")
+            else:
+                skt.send(("ERRG\r\n").encode())
+                skt.close()
+                break
             #inc_parser_client(data, tip, server_dict, )
 
 
@@ -305,15 +307,10 @@ def main():
     # Public ve private keyler
     # Burada her şekilde yeni key oluşturuluyor ancak eğer daha önceden oluşmuş key var ise
     # Write_Read_RSAKeys fonskiyonu tarafından okunup rsa_key dict ine yazılıyor.
-    keys = create_rsa_key(my_uuid)
-    private_key = my_uuid + "_private_key"
-    public_key = my_uuid + "_public_key"
-    private_key = keys[private_key].exportKey()
-    public_key = keys[public_key].exportKey()
 
-    rsa_keys = Write_Read_RSAKeys(public_key, private_key, logQueue)
-    private_key = rsa_keys['privKey']
-    public_key = rsa_keys['pubKey']
+    rsa_keys = Write_Read_RSAKeys(logQueue, my_uuid)
+    private_key = rsa_keys[ 'privKey' ]
+    public_key = rsa_keys[ 'pubKey' ]
 
     #list_control(server_dict, logQueue, ip, port, my_uuid)
     # #tüm listenin kontrol edilmesini sağlayan fonksiyon
@@ -329,7 +326,6 @@ def main():
     # server name icin
     serverCounter = 0
     while True:
-
         serverReaderQueue.put(s1.accept())
         server_thread = serverThread("Server Thread - " + str(serverCounter), logQueue, server_dict, my_uuid, public_key)
         server_thread.start()
