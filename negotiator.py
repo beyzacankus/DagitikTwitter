@@ -209,10 +209,10 @@ class serverThread(threading.Thread):
             soket = serverReaderQueue.get()
             c = soket['c']
             addr = soket['addr']
+            print(addr[0])
             print("Soket Server\n")
 
             # Kullanıcı kayıt olup olmadığı flag ile tutuluyor
-            flag = 0
             c_uuid = ""
             while True:
 
@@ -220,7 +220,7 @@ class serverThread(threading.Thread):
                     print("Recv Server\n")
                     rps = c.recv(1024).decode()
                     data_rcv = inc_parser_server(rps, self.my_uuid, "araci", self.logq, self.peer_dict,
-                                                 flag, clientSenderQueue, clientReaderQueue, self.pub_key ,c)
+                                                clientSenderQueue, clientReaderQueue, self.pub_key ,soket)
                     data = parser(data_rcv, "A")
                     data_rcv += "\n"
                     print(rps)
@@ -250,7 +250,7 @@ class clientToServer(threading.Thread):
             while not clientToServerQueue.empty():
                 reader_data = clientToServerQueue.get()  ##devamı gelecek.
                 print("reader data\n" + str(reader_data))
-                c = reader_data[ 'server_soket' ]
+                c = socket(reader_data[ 'server_soket' ])
                 data_dict = reader_data[ 'data_dict' ]
                 if ((reader_data[ 'cmd' ] == "AUID") and (reader_data['uuid'] == data_dict['cuuid'])):  # client reader queue dict yazılmış gibi değerlendirildi.
                     c_dict = {
@@ -258,14 +258,13 @@ class clientToServer(threading.Thread):
                         "cport": data_dict['cport' ],
                         "ctype": data_dict[ "ctype" ],
                         "cnick": data_dict[ "cnick" ],
-                        "last_login": time.ctime(time.time()), # time değeri float cinsinde atılıyor. Bu değeri datetime cinsine dönüştürmek için datetime.datetime.fromtimestamp(x) fonksiyonu verilmeli ve x yerine float değer yazılmalı
+                        "last_login": time.time() # time değeri float cinsinde atılıyor. Bu değeri datetime cinsine dönüştürmek için datetime.datetime.fromtimestamp(x) fonksiyonu verilmeli ve x yerine float değer yazılmalı
                         #pubkey eklenecek
                     }
                     server_dict[data_dict['cuuid']] = c_dict
                     appendToDictionaryFile(server_dict, self.logq, "araci", "_peer_dictionary.txt")
                     data = data_dict[ 'resp2' ] + " " + data_dict[ 'cuuid' ]
                     c.send(data.encode())
-                    flag = 1
                 else:
                     log = "AUID WAIT eşleşmesi yapılamadı\n"
                     self.logq.put(log)
