@@ -212,7 +212,7 @@ class serverThread(threading.Thread):
             print("Soket Server\n")
 
             # Kullanıcı kayıt olup olmadığı flag ile tutuluyor
-            flag = 1
+            flag = 0
             c_uuid = ""
             while True:
 
@@ -280,6 +280,7 @@ def main():
 
     # Server için soket bağlantıları
     s1 = socket.socket()
+    s1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     host = "0.0.0.0"
     #port = 4565
     port = int(sys.argv[2])
