@@ -174,20 +174,20 @@ class clientReader(threading.Thread):
                 client_toserver = clientToServer("Client to Server - " + str(csCounter), self.logq)
                 client_toserver.start()
                 csCounter += 1
-            elif (data['cmd'] == "WAIT"):
+            if (data['cmd'] == "WAIT"):
                 log = "Waiting for HELO connection."
                 self.logq.put(log)
                 print(log)
                 msg = skt.recv(1024).decode()
                 data = parser(msg, "Y")
-            elif (data['cmd'] == "WLCM"):
+            if (data['cmd'] == "WLCM"):
                 log = "WLCM received"
                 self.logq.put(log)
                 print(log)
                 skt.send(("LIST\r\n").encode())
                 msg = skt.recv(1024).decode()
                 data = parser(msg, "Y")
-            elif (data['cmd'] == "LSTO"):
+            if (data['cmd'] == "LSTO"):
                 list = eval(data["list"])  # Parametre olarak gelen dict alınıyor
                 mergeTwoDict(server_dict, list)  # server_dict'e gelen dict ekleniyor
                 log = "Gelen peer listesi asıl listeye eklendi"
