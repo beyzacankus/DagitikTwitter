@@ -231,6 +231,10 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
                     "status": "NOK",
                     "cmd": omesaj
                 }
+        elif (command == authhata):
+            rdict = {
+                "status": "OK"
+            }
         else:  # genel hatayı burada tanımlıyoruz
             rdict = {
                 "status": "NOK",
@@ -247,13 +251,11 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
     return rdict
 
 
-def inc_parser_server(data, suuid, type, logq, user_dict, clientsenderqueue, clientreaderqueue, public_key, soket):
+def inc_parser_server(data, suuid, type, logq, user_dict, clientsenderqueue, clientreaderqueue, public_key, soket, addr):
     if (type == "araci"):
         tip = araci
     else:
         tip = yayinci
-    c, addr = soket
-
     data_dict = parser(data, tip)
     data = ""
     if (data_dict[ 'status' ] == "OK"):
@@ -283,10 +285,13 @@ def inc_parser_server(data, suuid, type, logq, user_dict, clientsenderqueue, cli
             data = data_dict[ 'resp' ]
 
         elif (data_dict[ 'cmd' ] == list):
+            print("LIST isteği geldi")
             if ispeer_valid(addr[ 0 ], user_dict):
+                print("ispeer")
                 #return_dict = timestamptodate(user_dict)
                 data = data_dict[ 'resp' ] + " " + str(user_dict)
             else:
+                print("isnotpeer")
                 data = "AUTH"
 
         elif (data_dict[ 'cmd' ] == suid):
@@ -303,9 +308,8 @@ def inc_parser_server(data, suuid, type, logq, user_dict, clientsenderqueue, cli
             else:
                 data = "AUTH"
     else:
-        soket.send(str(data_dict[ 'resp' ]).encode())
+        data = data_dict[ 'resp' ]
         logq.put(data_dict)
-        soket.close()
     return data
 
 
