@@ -295,7 +295,8 @@ def inc_parser_server(data, suuid, type, logq, user_dict, flag, clientsenderqueu
             if flag == 1:
                 r_pub_key = data_dict['cpubkey']
 
-                data = data_dict['resp'] + " " + public_key
+                print("Public key gönderime hazır" + data + "\n")
+                data = data_dict['resp'] + " " + str(public_key)
 
             else:
                 data = "AUTH"
