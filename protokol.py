@@ -249,7 +249,7 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
     return rdict
 
 
-def inc_parser_server(data, suuid, type, logq, user_dict, pubkey_dict, clientsenderqueue, clientreaderqueue, public_key, soket, addr):
+def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue, clientreaderqueue, public_key, soket, addr, pubkey_dict = {}):
     if (type == "araci"):
         tip = araci
     else:
