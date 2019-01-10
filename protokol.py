@@ -272,7 +272,7 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
 
 
 def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue,
-                      clientreaderqueue, public_key, soket, addr, pubkey_dict = {}, blocklist = {}, followlist = {}):
+                      clientreaderqueue, private_key, public_key, soket, addr, pubkey_dict = {}, blocklist = {}, followlist = {}):
     tip = type
     data_dict = parser(data, tip)
     data = ""
@@ -352,6 +352,15 @@ def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue,
                         data = data_dict['resp2']
                 else:
                     data = "AUTH"
+            elif(data_dict['cmd'] == omesaj):
+                if ispeer_valid(addr[ 0 ], user_dict):
+                    private_key = RSA.importKey(private_key)
+                    mesaj = data_dict['mesaj']
+                    dec = decrypte_message(mesaj, private_key)
+                    print(dec)
+                else:
+                    data = "AUTH"
+
         else:
             data = "BANN"
     else:
@@ -401,6 +410,19 @@ def out_parser_client(command, uuid, type, logq, user_dict,  clientsenderqueue,
                 'port': port,
                 'cmd': command['data']
             }
+        elif(data_dict['cmd'] == omesaj):
+            ip = user_dict[ uuid ][ 'cip' ]
+            port = user_dict[ uuid ][ 'cport' ]
+            mesaj = data_dict['mesaj']
+            adamin_pub_key = RSA.importKey[pubkey_dict[uuid]]
+            enc_mesaj = encrypte_message(mesaj,adamin_pub_key)
+            data = {
+                'server_flag': "0",
+                'ip': ip,
+                'port': port,
+                'cmd': data_dict[ 'cmd' ] + " " + enc_mesaj
+            }
+
 
     clientsenderqueue.put(data)
 
