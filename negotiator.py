@@ -213,8 +213,6 @@ class serverThread(threading.Thread):
             print(addr[0])
             print("Soket Server\n")
 
-            # Kullanıcı kayıt olup olmadığı flag ile tutuluyor
-            c_uuid = ""
             while True:
 
                 try:
@@ -236,6 +234,8 @@ class serverThread(threading.Thread):
                     self.logq.put(log)
                     print(log)
                     break #hatalı durumlarda protokol.py içerisinde close
+        log = tip + " " + self.name + " kapandi\n"
+        self.logq.put(log)
 
 
 class clientToServer(threading.Thread):
