@@ -30,10 +30,14 @@ class Test_Ui(QtWidgets.QMainWindow):
     def connect_to_twitter(self):
         # girilen nickname ' i al
         user_nickname = self.ui.plainTextEdit.toPlainText()
+        print(user_nickname)
+
+        #H
 
 
+        # Yayıncı peer oluştur veya yayıncı peerına bağlan
 
-        # Yayıncı peer oluştur
+        #yayıncı peer
 
         # Yayıncı peer aracı peer'a bağlanacak
 
@@ -86,9 +90,13 @@ class Test_Ui(QtWidgets.QMainWindow):
         pass
 
     def share_context(self):
+        tweet_data = self.ui.plainTextEdit_4.toPlainText()
+
         pass
 
     def send_message(self):
+        message_body_data = self.ui.plainTextEdit_5.toPlainText()
+
         pass
 
     def refresh_feed(self):
