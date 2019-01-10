@@ -321,15 +321,7 @@ def out_parser_client(data, type, my_pub_key, clientSenderQueue, clientReaderQue
 
 def inc_parser_client(data, type, server_dict, follow_list, pubkey_dict, clientReaderQueue, clientSenderQueue, logq):
     if (data[ 'status' ] == "OK"):
-        if (data[ 'cmd' ] == listo):
-            list = data[ "list" ]  # Parametre olarak gelen dict alınıyor
-            mergeTwoDict(server_dict, list)  # server_dict'e gelen dict ekleniyor
-            log = "Gelen peer listesi asıl listeye eklendi"
-            logq.put(log)
-            appendToDictionaryFile(server_dict, logq, type, "_peer_dict")
-            print("Peerdan alınan liste sözlüğe eklendi\n")
-
-        elif (data[ 'cmd' ] == pubkeygeldi):
+        if (data[ 'cmd' ] == pubkeygitsin):
             # gelen pub_key i alacak server_dict te ekleyecek fonksiyon
             cuuid = data[ 'data_dict' ][ 'cuuid' ]
             pubkey_dict[ cuuid ] = data[ 'spubkey' ]
