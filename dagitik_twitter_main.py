@@ -16,6 +16,7 @@ from blogger import *
 
 from ui.dagitik_twitter_ui import Ui_MainWindow
 
+user_nickname = ""
 
 class Test_Ui(QtWidgets.QMainWindow):
     def __init__(self, my_ip, my_port):
@@ -49,7 +50,6 @@ class Test_Ui(QtWidgets.QMainWindow):
             "to_port" : to_port,
             "data" : data
         }
-
 
         out_parser_client(command, my_uuid, tip,logQueue,server_dict, clientSenderQueue, pubkey_dict, block_list,follow_list)
         print(user_nickname)
@@ -106,35 +106,60 @@ class Test_Ui(QtWidgets.QMainWindow):
         pass
 
     def unblock_user(self):
+        print(self.ui.listWidget_6.currentItem().text())
         pass
 
     def subscribe(self):
+        self.ui.listWidget_6.addItem("Emre")
+        self.ui.listWidget_6.addItem("Emre2")
+        self.ui.listWidget_6.addItem("Emre3")
+
         pass
 
     def share_context(self):
         tweet_data = self.ui.plainTextEdit_4.toPlainText()
+        count = 1
+        for key in mikro_blog:
+            count +=1
+        tweet_no = "tweet"+str(count)
+        mikro_blog[tweet_no]={
+            'time':time.time(),
+            'tweet':tweet_data
+        }
 
-        pass
+        appendToDictionaryFile(mikro_blog, logQueue, tip, "_mikroblog_dic.txt")
+        data = "TWTS " + tweet_data
+        command = {
+            'data':data
+        }
+        out_parser_client(command, my_uuid, tip, logQueue, server_dict, clientSenderQueue, pubkey_dict, block_list,
+                          follow_list)
+
 
     def send_message(self):
         message_body_data = self.ui.plainTextEdit_5.toPlainText()
         to_ip = "192.168.1.108"
         to_port = 5662
+        nick = "yayinci57407536053104"
+        uuid = nicktouid(nick, server_dict)
 
         data = "PRIV "+message_body_data
 
         command = {
-            "to_ip" : to_ip,
-            "to_port" : to_port,
+            "to_ip" : server_dict[uuid]['cip'],
+            "to_port" : int(server_dict[uuid]['cport']),
             "data" : data
         }
 
 
-        out_parser_client(command, my_uuid, tip,logQueue,server_dict, clientSenderQueue, pubkey_dict, block_list,follow_list)
+        out_parser_client(command, uuid, tip,logQueue,server_dict, clientSenderQueue, pubkey_dict, block_list,follow_list)
 
         pass
 
     def refresh_feed(self):
+
+
+
         pass
 
     def run(self):
