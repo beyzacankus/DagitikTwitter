@@ -317,15 +317,9 @@ def main():
     # Public ve private keyler
     # Burada her şekilde yeni key oluşturuluyor ancak eğer daha önceden oluşmuş key var ise
     # Write_Read_RSAKeys fonskiyonu tarafından okunup rsa_key dict ine yazılıyor.
-    keys = create_rsa_key(my_uuid)
-    private_key = my_uuid + "_private_key"
-    public_key = my_uuid + "_public_key"
-    private_key = keys[private_key].exportKey()
-    public_key = keys[public_key].exportKey()
-
     rsa_keys = Write_Read_RSAKeys(logQueue, my_uuid)
-    private_key = rsa_keys['privKey']
-    public_key = rsa_keys['pubKey']
+    private_key = rsa_keys[ 'privKey' ]
+    public_key = rsa_keys[ 'pubKey' ]
 
     # list_control(server_dict, logQueue, ip, port, my_uuid)
     # #tüm listenin kontrol edilmesini sağlayan fonksiyon
@@ -341,18 +335,11 @@ def main():
     # server name icin
     serverCounter = 0
     while True:
-        c, addr = s1.accept()
-        gelen_soket = {
-            'c': c,
-            'addr': addr
-        }
-        # print(addr[1])
-        serverReaderQueue.put(gelen_soket)
-        logQueue.put('Got connection from ' + str(addr))
-        server_thread = serverThread("Server Thread - " + str(serverCounter), logQueue, server_dict, my_uuid,
-                                     public_key)
+        serverReaderQueue.put(s1.accept())
+        server_thread = serverThread("Server Thread - " + str(serverCounter), logQueue, server_dict, my_uuid, public_key)
         server_thread.start()
         serverCounter += 1
+
 
 
 if __name__ == '__main__':
