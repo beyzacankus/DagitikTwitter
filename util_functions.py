@@ -34,13 +34,13 @@ def Write_Read_RSAKeys(logq, my_uuid): #RSA keylerini oluşturup dosyaya yazan e
     privKey_file = Path("./my_privKey.txt")
 
     if pubKey_file.is_file() and privKey_file.is_file():
-        file = open(pubKey_file, "r+")
+        file = open(str(pubKey_file), "r+")
         fid_pub = file.read().encode()
         keys_dict = {
             "pubKey": RSA.importKey(fid_pub)
         }
 
-        file = open(privKey_file, "r+")
+        file = open(str(privKey_file), "r+")
         fid_priv = file.read().encode()
         keys_dict[ 'privKey' ] = RSA.importKey(fid_priv)
 
@@ -51,15 +51,14 @@ def Write_Read_RSAKeys(logq, my_uuid): #RSA keylerini oluşturup dosyaya yazan e
         public_key = my_uuid + "_public_key"
         private_key = keys[private_key].exportKey()
         public_key = keys[public_key].exportKey()
-
-        fid_pub = open(pubKey_file, "w")
+        fid_pub = open(str(pubKey_file), "w")
         fid_pub.write(public_key.decode())
         keys_dict = {
             "pubKey": public_key
         }
         logq.put("PublicKey oluşturuldu, dosyaya yazıldı.")
 
-        fid_priv = open(privKey_file, "w")
+        fid_priv = open(str(privKey_file), "w")
         fid_priv.write(private_key.decode())
         keys_dict[ 'privKey' ] = private_key
 
