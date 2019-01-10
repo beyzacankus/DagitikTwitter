@@ -1,10 +1,18 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 import sys
 import negotiator
-import yayıncı
-import util_functions
-import protokol
 import loggerThread
+import threading
+import queue
+import socket
+import time
+import datetime
+import uuid
+
+from loggerThread import loggerThread
+from util_functions import *
+from protokol import *
+from blogger import *
 
 from ui.dagitik_twitter_ui import Ui_MainWindow
 
@@ -106,9 +114,59 @@ class Test_Ui(QtWidgets.QMainWindow):
         self.qt_app.exec_()
 
 
+
+class OnYuzThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+
+    def run(self):
+        app = Test_Ui()
+        app.run()
+
 def main():
-    app = Test_Ui()
-    app.run()
+
+    logger_thread = loggerThread(logQueue)
+    logger_thread.start()
+
+    # Server için soket bağlantıları
+    s1 = socket.socket()
+    host = "0.0.0.0"
+    # port = 4565
+    port = int(sys.argv[2])
+    s1.bind((host, port))
+    s1.listen(5)
+
+    # Kendi ip ve port bilgilerini client alıyor, bunları karşı tarafa atıcak
+    # ip = "192.168.0.29"
+    ip = str(sys.argv[1])
+    # print("Main IP", str(ip))
+    port = int(sys.argv[2])
+
+    # Kullanıcı kayıtlarının tutulacağı dictionary
+    # write_dictionary ile text dosyası çağırılıp önceki kayıtlar dictionary içerisine yazılıyor
+
+    # list_control(server_dict, logQueue, ip, port, my_uuid)
+    # #tüm listenin kontrol edilmesini sağlayan fonksiyon
+    # bu kod içerisinde time sleep olduğu için bunu çağıracak thread in başka işi olduğunda bekleme yapıyor
+
+    # --------------------------------------RSA KEYS
+
+    client_thread = clientThread(server_dict, clientSenderQueue, clientReaderQueue, logQueue, ip, port, my_uuid)
+    client_thread.start()
+    client_dict_thread = clientDictThread(server_dict, logQueue, ip, port, my_uuid)
+    client_dict_thread.start()
+
+    OnYuz = OnYuzThread()
+    OnYuz.start()
+
+    # server name icin
+    serverCounter = 0
+    while True:
+        serverReaderQueue.put(s1.accept())
+        server_thread = serverThread("Server Thread - " + str(serverCounter), logQueue, server_dict, my_uuid,
+                                     public_key)
+        server_thread.start()
+        serverCounter += 1
 
 
 if __name__ == '__main__':
