@@ -323,7 +323,7 @@ def main():
     private_key = keys[private_key].exportKey()
     public_key = keys[public_key].exportKey()
 
-    rsa_keys = Write_Read_RSAKeys(public_key, private_key, logQueue)
+    rsa_keys = Write_Read_RSAKeys(logQueue, my_uuid)
     private_key = rsa_keys['privKey']
     public_key = rsa_keys['pubKey']
 
