@@ -278,7 +278,7 @@ def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue,
     data = ""
     if (data_dict[ 'status' ] == "OK"):
         cuuid = iptouid(addr[ 0 ], user_dict)
-        if(cuuid not in blocklist):
+        if((cuuid != False) and (cuuid not in blocklist)):
             if (data_dict[ 'cmd' ] == merhaba):
                 if (data_dict[ 'cuuid' ] in user_dict):
                     data = data_dict[ 'resp2' ] + " " + data_dict[ 'cuuid' ]
