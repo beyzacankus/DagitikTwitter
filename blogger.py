@@ -23,7 +23,11 @@ tip = "yayinci"
 server_dict = readFromDictionaryFile(logQueue, tip, "_peer_dictionary.txt")
 pubkey_dict = readFromDictionaryFile(logQueue, tip, "_pubkey_dict.txt")
 follow_list = readFromDictionaryFile(logQueue, tip, "_follow_list.txt")
+mikro_blog = readFromDictionaryFile(logQueue, tip, "_mikroblog_dic.txt")
+follower_list = readFromDictionaryFile(logQueue, tip, "_follower_list.txt")
 block_list = readFromDictionaryFile(logQueue, tip, "_block_list.txt")
+pm_dict = readFromDictionaryFile(logQueue, tip, "_ozel_mesaj.txt")
+feeds = readFromDictionaryFile(logQueue, tip, "_all_feeds.txt")
 
 # MAC adresiyle UUID
 my_uuid = str(uuid.getnode())
@@ -66,6 +70,8 @@ class clientThread(
                 client_sender_thread.start()
                 counter += 1
                 print("Yayıncı sender çalıştı")
+
+#class OzelMesajThread(threading.Thread):
 
 
 class clientDictThread(threading.Thread):
@@ -232,8 +238,9 @@ class clientReader(threading.Thread):
                         pubkey_dict[cuuid]['verified'] = "False"
                     appendToDictionaryFile(pubkey_dict, self.logq, tip, "_pubkey_dict.txt")
             else:
-                print("burayı doldur")
-            # inc_parser_client(data, tip, server_dict, )
+                inc_parser_client(data, data_queue['ip'],tip, logQueue, server_dict, clientReaderQueue,
+                                  clientSenderQueue, private_key, feeds, follow_list, pubkey_dict)
+            #
 
 # Server için thread
 class serverThread(threading.Thread):
@@ -261,7 +268,8 @@ class serverThread(threading.Thread):
                     print("Recv Server\n")
                     rps = c.recv(1024).decode()
                     data_rcv = inc_parser_server(rps, self.my_uuid, tip, self.logq, self.peer_dict,
-                                                clientSenderQueue, clientReaderQueue, private_key, self.pub_key, c, addr, pubkey_dict, block_list, follow_list)
+                                                clientSenderQueue, clientReaderQueue, private_key, self.pub_key, c, addr,
+                                                 pm_dict, mikro_blog, block_list, follow_list)
                     data = parser(data_rcv, tip)
                     data_rcv += "\n"
                     print(rps)
