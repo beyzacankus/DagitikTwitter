@@ -304,17 +304,6 @@ def main():
     my_uuid = str(uuid.getnode())
     print(my_uuid)
 
-    # Public ve private keyler
-    # Burada her şekilde yeni key oluşturuluyor ancak eğer daha önceden oluşmuş key var ise
-    # Write_Read_RSAKeys fonskiyonu tarafından okunup rsa_key dict ine yazılıyor.
-
-
-    #list_control(server_dict, logQueue, ip, port, my_uuid)
-    # #tüm listenin kontrol edilmesini sağlayan fonksiyon
-    # bu kod içerisinde time sleep olduğu için bunu çağıracak thread in başka işi olduğunda bekleme yapıyor
-
-    #--------------------------------------RSA KEYS
-
     client_thread = clientThread(server_dict, clientSenderQueue, clientReaderQueue, logQueue, ip, port, my_uuid)
     client_thread.start()
     client_dict_thread = clientDictThread(server_dict, logQueue, ip, port, my_uuid)
