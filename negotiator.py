@@ -308,12 +308,12 @@ def main():
     client_thread.start()
     client_dict_thread = clientDictThread(server_dict, logQueue, ip, port, my_uuid)
     client_dict_thread.start()
-    
+    public_key = ""
     # server name icin
     serverCounter = 0
     while True:
         serverReaderQueue.put(s1.accept())
-        server_thread = serverThread("Server Thread - " + str(serverCounter), logQueue, server_dict, my_uuid, public_key = "")
+        server_thread = serverThread("Server Thread - " + str(serverCounter), logQueue, server_dict, my_uuid, public_key)
         server_thread.start()
         serverCounter += 1
 
