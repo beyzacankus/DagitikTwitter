@@ -216,9 +216,9 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
         elif (command == ban):  # user ban
             if (type == yayinci):
                 rdict = {
-                    "status": "OK",
+                    "status": "NOK",
                     "cmd": ban,
-                    "resp": " "
+                    "resp": "BANN"
                 }
             else:
                 rdict = {
@@ -271,73 +271,80 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
     return rdict
 
 
-def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue, clientreaderqueue, public_key, soket, addr, pubkey_dict = {}):
+def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue,
+                      clientreaderqueue, public_key, soket, addr, pubkey_dict = {}, blocklist = {}, followlist = {}):
     tip = type
     data_dict = parser(data, tip)
     data = ""
     if (data_dict[ 'status' ] == "OK"):
-        if (data_dict[ 'cmd' ] == merhaba):
-            if (data_dict[ 'cuuid' ] in user_dict):
-                data = data_dict[ 'resp2' ] + " " + data_dict[ 'cuuid' ]
-                user_dict[ data_dict[ 'cuuid' ] ][ 'cip' ] = data_dict[ 'cip' ]
-                user_dict[ data_dict[ 'cuuid' ] ][ 'cport' ] = data_dict[ 'cport' ]
-                user_dict[ data_dict[ 'cuuid' ] ][ 'last_login' ] = time.time()
-                appendToDictionaryFile(user_dict, logq, "araci", "_peer_dictionary.txt")
-                # eğer uuid var ve ip-port farklı ise güncelle sonra welcome dön
-                # gelen_port
-                # gelen uuid
-            else:  # WAIT burada göndereliyor ancak ekleme yapmak için client threadinin SUID kontrolünün sonucunu beklemek gerekiyor.
-                data = data_dict[ 'resp1' ]
-                command = {
-                    'server_flag': "1",
-                    'ip': data_dict[ 'cip' ],
-                    'port': data_dict[ 'cport' ],
-                    'cmd': "SUID",
-                    'soket': soket,
-                    'data_dict': data_dict
-                }
-                print(command)
-                clientsenderqueue.put(command)
-        elif (data_dict[ 'cmd' ] == hosgeldin):
-            data = data_dict[ 'resp' ]
+        cuuid = iptouid(addr[ 0 ], user_dict)
+        if(cuuid not in blocklist):
+            if (data_dict[ 'cmd' ] == merhaba):
+                if (data_dict[ 'cuuid' ] in user_dict):
+                    data = data_dict[ 'resp2' ] + " " + data_dict[ 'cuuid' ]
+                    user_dict[ data_dict[ 'cuuid' ] ][ 'cip' ] = data_dict[ 'cip' ]
+                    user_dict[ data_dict[ 'cuuid' ] ][ 'cport' ] = data_dict[ 'cport' ]
+                    user_dict[ data_dict[ 'cuuid' ] ][ 'last_login' ] = time.time()
+                    appendToDictionaryFile(user_dict, logq, "araci", "_peer_dictionary.txt")
+                    # eğer uuid var ve ip-port farklı ise güncelle sonra welcome dön
+                    # gelen_port
+                    # gelen uuid
+                else:  # WAIT burada göndereliyor ancak ekleme yapmak için client threadinin SUID kontrolünün sonucunu beklemek gerekiyor.
+                    data = data_dict[ 'resp1' ]
+                    command = {
+                        'server_flag': "1",
+                        'ip': data_dict[ 'cip' ],
+                        'port': data_dict[ 'cport' ],
+                        'cmd': "SUID",
+                        'soket': soket,
+                        'data_dict': data_dict
+                    }
+                    print(command)
+                    clientsenderqueue.put(command)
+            elif (data_dict[ 'cmd' ] == hosgeldin):
+                data = data_dict[ 'resp' ]
 
-        elif (data_dict[ 'cmd' ] == list):
-            print("LIST isteği geldi")
-            if ispeer_valid(addr[ 0 ], user_dict):
-                print("ispeer")
-                #return_dict = timestamptodate(user_dict)
-                data = data_dict[ 'resp' ] + " " + str(user_dict)
-            else:
-                print("isnotpeer")
-                data = "AUTH"
-
-        elif (data_dict[ 'cmd' ] == suid):
-
-            data = data_dict[ 'resp' ] + " " + suuid
-
-        elif (data_dict[ 'cmd' ] == pubkeygeldi):
-            if ispeer_valid(addr[ 0 ], user_dict):
-                r_pub_key = data_dict[ 'cpubkey' ]
-                cuuid = iptouid(addr[0], user_dict)
-                pubkey_dict[ cuuid ] = {
-                    'pubKey': r_pub_key
-                }
-                appendToDictionaryFile(pubkey_dict, logq, tip, "_pubkey_dict.txt")
-                log = str(cuuid) + " public Key eklendi."
-                logq.put(log)
-                print(log)
-                print("Public key gönderime hazır" + data + "\n")
-                data = data_dict[ 'resp' ] + " " + str(public_key.exportKey("PEM").decode())
-            else:
-                data = "AUTH"
-        elif (data_dict['cmd'] == pubkeycontrol):
-            if ispeer_valid(addr[ 0 ], user_dict):
-                adamin_pub_key = RSA.importKey(pubkey_dict[data_dict['ctext']]['pubKey'])
-                sign = check_signature(data_dict['ctext'], data_dict['csigned'], adamin_pub_key)
-                if(sign):
-                    data = data_dict['resp1']
+            elif (data_dict[ 'cmd' ] == list):
+                print("LIST isteği geldi")
+                if ispeer_valid(addr[ 0 ], user_dict):
+                    print("ispeer")
+                    #return_dict = timestamptodate(user_dict)
+                    data = data_dict[ 'resp' ] + " " + str(user_dict)
                 else:
-                    data = data_dict['resp2']
+                    print("isnotpeer")
+                    data = "AUTH"
+
+            elif (data_dict[ 'cmd' ] == suid):
+
+                data = data_dict[ 'resp' ] + " " + suuid
+
+            elif (data_dict[ 'cmd' ] == pubkeygeldi):
+                if ispeer_valid(addr[ 0 ], user_dict):
+                    r_pub_key = data_dict[ 'cpubkey' ]
+                    cuuid = iptouid(addr[0], user_dict)
+                    pubkey_dict[ cuuid ] = {
+                        'pubKey': r_pub_key
+                    }
+                    appendToDictionaryFile(pubkey_dict, logq, tip, "_pubkey_dict.txt")
+                    log = str(cuuid) + " public Key eklendi."
+                    logq.put(log)
+                    print(log)
+                    print("Public key gönderime hazır" + data + "\n")
+                    data = data_dict[ 'resp' ] + " " + str(public_key.exportKey("PEM").decode())
+                else:
+                    data = "AUTH"
+            elif (data_dict['cmd'] == pubkeycontrol):
+                if ispeer_valid(addr[ 0 ], user_dict):
+                    adamin_pub_key = RSA.importKey(pubkey_dict[data_dict['ctext']]['pubKey'])
+                    sign = check_signature(data_dict['ctext'], data_dict['csigned'], adamin_pub_key)
+                    if(sign):
+                        data = data_dict['resp1']
+                    else:
+                        data = data_dict['resp2']
+                else:
+                    data = "AUTH"
+        else:
+            data = "BANN"
     else:
         if(data_dict[ 'resp' ]):
             data = data_dict['resp']
@@ -347,9 +354,34 @@ def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue, cl
     return data
 
 
-def out_parser_client(data, type, my_pub_key, clientSenderQueue, clientReaderQueue):
+def out_parser_client(data, uuid, type, logq, user_dict,  clientsenderqueue,
+                        pubkey_dict = {}, blocklist = {}, followlist = {}):
+    tip = type
+    data_dict = parser(data, tip)
+    ip = user_dict[ uuid ][ 'cip' ]
+    port = user_dict[ uuid ][ 'cport' ]
+    if (data_dict[ 'status' ] == "NOK"):
+        if (data_dict[ 'cmd' ] == ban):
+            blocklist[ uuid ] = "blocked"
+            appendToDictionaryFile(blocklist, logq, tip, "_block_list.txt")
+            data = {
+                'server_flag':"0",
+                'ip':ip,
+                'port':port,
+                'cmd':data_dict[ 'resp' ]
+            }
+            log = str(uuid) + " BANLANDI"
+            logq.put(log)
+    else:
+        if(data_dict['cmd'] == microblogistek):
+            data = {
+                'server_flag':"0",
+                'ip':ip,
+                'port':port,
+                'cmd':data_dict['cmd'] + " " + data_dict['count']
+            }
 
-    return 1
+    clientsenderqueue.put(data)
 
 
 def inc_parser_client(data, type, server_dict, follow_list, pubkey_dict, clientReaderQueue, clientSenderQueue, logq):
