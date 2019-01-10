@@ -261,7 +261,7 @@ class serverThread(threading.Thread):
                     print("Recv Server\n")
                     rps = c.recv(1024).decode()
                     data_rcv = inc_parser_server(rps, self.my_uuid, tip, self.logq, self.peer_dict,
-                                                clientSenderQueue, clientReaderQueue, self.pub_key, c, addr, pubkey_dict, block_list, follow_list)
+                                                clientSenderQueue, clientReaderQueue, private_key, self.pub_key, c, addr, pubkey_dict, block_list, follow_list)
                     data = parser(data_rcv, tip)
                     data_rcv += "\n"
                     print(rps)
