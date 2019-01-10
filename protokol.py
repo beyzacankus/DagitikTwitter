@@ -354,7 +354,7 @@ def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue,
                     data = "AUTH"
             elif(data_dict['cmd'] == omesaj):
                 if ispeer_valid(addr[ 0 ], user_dict):
-                    private_key = RSA.importKey(private_key)
+                    #priv_key = RSA.importKey(private_key)
                     mesaj = data_dict['mesaj']
                     dec = decrypte_message(mesaj, private_key)
                     print(dec)
