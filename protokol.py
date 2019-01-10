@@ -140,7 +140,29 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
                     "status": "NOK",
                     "cmd": pubkeycontrol
                 }
+        elif(command == pubkeyonay):
+            if(type == yayinci):
+                rdict = {
+                    "status": "OK",
+                    "cmd": pubkeyonay
+                }
+            else:
+                rdict = {
+                    "status": "NOK",
+                    "cmd": pubkeyonay
+                }
 
+        elif(command == pubkeydenied):
+            if(type == yayinci):
+                rdict = {
+                    "status": "OK",
+                    "cmd": pubkeydenied
+                }
+            else:
+                rdict = {
+                    "status": "NOK",
+                    "cmd": pubkeydenied
+                }
         elif (command == microblogistek):  # mikroblog onay mesajı ve count dönüyoruz.
             if (type == yayinci):
                 rdict = {
@@ -301,6 +323,7 @@ def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue, cl
                 r_pub_key = data_dict[ 'cpubkey' ]
                 cuuid = iptouid(addr[0], user_dict)
                 pubkey_dict[ cuuid ] = r_pub_key
+                appendToDictionaryFile(pubkey_dict, logq, tip, "_pubkey_dict.txt")
                 log = str(cuuid) + " public Key eklendi."
                 logq.put(log)
                 print(log)
@@ -308,6 +331,12 @@ def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue, cl
                 data = data_dict[ 'resp' ] + " " + str(public_key.exportKey("PEM").decode())
             else:
                 data = "AUTH"
+        elif (data_dict['cmd'] == pubkeycontrol):
+            if ispeer_valid(addr[ 0 ], user_dict):
+                adamin_pub_key = RSA.importKey(pubkey_dict[data_dict['ctext']])
+                sign = check_signature(data_dict['ctext'], data_dict['csigned'], adamin_pub_key)
+                print(str(sign) + " \n ---------- OLDU --------------")
+                data = data_dict['resp1']
     else:
         if(data_dict[ 'resp' ]):
             data = data_dict['resp']
