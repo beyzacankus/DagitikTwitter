@@ -202,3 +202,11 @@ def ispeer_valid(ip, user_dict):
         return True
     else:
         return False
+
+def iptouid(ip, user_dict):
+
+    for keys in user_dict:
+        if user_dict[keys ][ 'cip' ] == str(ip):
+            user_id = keys
+
+    return user_id
