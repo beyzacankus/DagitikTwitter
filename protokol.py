@@ -40,8 +40,8 @@ authhata = "AUTH"
 engelhatasi = "BLCK"
 
 # types, parser fonksiyonunu çağıran aracı mı ? yayıncı mı ? bunu bilmemiz gerekiyor.
-araci = "A"
-yayinci = "Y"
+araci = "araci"
+yayinci = "yayinci"
 
 
 def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
@@ -272,10 +272,7 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
 
 
 def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue, clientreaderqueue, public_key, soket, addr, pubkey_dict = {}):
-    if (type == "araci"):
-        tip = araci
-    else:
-        tip = yayinci
+    tip = type
     data_dict = parser(data, tip)
     data = ""
     if (data_dict[ 'status' ] == "OK"):
