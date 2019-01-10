@@ -31,8 +31,7 @@ class Test_Ui(QtWidgets.QMainWindow):
         # girilen nickname ' i al
         user_nickname = self.ui.plainTextEdit.toPlainText()
         print(user_nickname)
-
-        #H
+        self.ui.label_2.setText(user_nickname)
 
 
         # Yayıncı peer oluştur veya yayıncı peerına bağlan
