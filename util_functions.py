@@ -1,6 +1,9 @@
 from Crypto.PublicKey import RSA
 from Crypto import Random
 from Crypto.Hash import SHA256
+from Crypto.Signature import PKCS1_v1_5
+from base64 import b64encode, b64decode
+import Crypto.Signature
 import threading
 import queue
 import socket
@@ -32,14 +35,14 @@ def Write_Read_RSAKeys(logq, my_uuid): #RSA keylerini oluşturup dosyaya yazan e
 
     if pubKey_file.is_file() and privKey_file.is_file():
         file = open(pubKey_file, "r+")
-        fid_pub = file.read()
+        fid_pub = file.read().encode()
         keys_dict = {
-            "pubKey": RSA.import_key(fid_pub)
+            "pubKey": RSA.importKey(fid_pub)
         }
 
         file = open(privKey_file, "r+")
-        fid_priv = file.read()
-        keys_dict[ 'privKey' ] = RSA.import_key(fid_priv)
+        fid_priv = file.read().encode()
+        keys_dict[ 'privKey' ] = RSA.importKey(fid_priv)
 
     else:
 
@@ -82,14 +85,18 @@ def decrypte_message(encrypted_message,receiver_private_key) :
 
 
 def sign_message(message, private_key):
-    hash = SHA256.new(message.encode()).digest()
-    signature = private_key.sign(hash, '')
-    return signature
+    hash = SHA256.new()
+    hash.update(message.encode())
+    signer = PKCS1_v1_5.new(private_key)
+    signature = signer.sign(hash)
+    return b64encode(signature).decode()
 
 
 def check_signature(message, signature, sender_public_key) :
-    hash = SHA256.new(message.encode()).digest()
-    return sender_public_key.verify(hash, signature)
+    hash = SHA256.new()
+    hash.update(message.encode())
+    signer = PKCS1_v1_5.new(sender_public_key)
+    return signer.verify(hash, b64decode(signature))
 
 
 

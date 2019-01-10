@@ -209,7 +209,8 @@ class clientReader(threading.Thread):
                     appendToDictionaryFile(server_dict, self.logq, tip, "_peer_dictionary.txt")
                     print("Peerdan alınan liste sözlüğe eklendi\n")
                     skt.send(("PUBR "+str(public_key.exportKey("PEM").decode()) +"\r\n").encode())
-                    #print(str(public_key.exportKey("PEM").decode()))
+                    log = "PUBR mesajı gönderildi."
+                    self.logq.put(log)
                     msg = skt.recv(1024).decode()
                     data = parser(msg, "Y")
                 if(data['cmd'] == "PUBO"):
@@ -219,6 +220,12 @@ class clientReader(threading.Thread):
                     log = str(cuuid) + " public Key eklendi."
                     self.logq.put(log)
                     print(log)
+                    skt.send(str("PUBC " + str(my_uuid) + " " + str(sign_message(str(my_uuid), private_key))).encode())
+                    log = "PUBC mesajı gönderildi."
+                    self.logq.put(log)
+                    msg = skt.recv(1024).decode()
+                    data = parser(msg, "Y")
+                    print(data)
             else:
                 print("burayı doldur")
             # inc_parser_client(data, tip, server_dict, )

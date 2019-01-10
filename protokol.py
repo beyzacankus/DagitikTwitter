@@ -335,8 +335,10 @@ def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue, cl
             if ispeer_valid(addr[ 0 ], user_dict):
                 adamin_pub_key = RSA.importKey(pubkey_dict[data_dict['ctext']])
                 sign = check_signature(data_dict['ctext'], data_dict['csigned'], adamin_pub_key)
-                print(str(sign) + " \n ---------- OLDU --------------")
-                data = data_dict['resp1']
+                if(sign):
+                    data = data_dict['resp1']
+                else:
+                    data = data_dict['resp2']
     else:
         if(data_dict[ 'resp' ]):
             data = data_dict['resp']
