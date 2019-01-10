@@ -176,7 +176,7 @@ class clientReader(threading.Thread):
             skt = data_queue['skt']
             msg = skt.recv(1024).decode()
             print(msg)
-            data = parser(msg, "Y")
+            data = parser(msg, tip)
             if (data_queue['server_flag'] == "1"):
                 data['server_soket'] = data_queue['server_soket']
                 data['data_dict'] = data_queue['data_dict']
@@ -193,14 +193,14 @@ class clientReader(threading.Thread):
                     self.logq.put(log)
                     print(log)
                     msg = skt.recv(1024).decode()
-                    data = parser(msg, "Y")
+                    data = parser(msg, tip)
                 if (data[ 'cmd' ] == "WLCM"):
                     log = "WLCM received"
                     self.logq.put(log)
                     print(log)
                     skt.send(("LIST\r\n").encode())
                     msg = skt.recv(1024).decode()
-                    data = parser(msg, "Y")
+                    data = parser(msg, tip)
                 if (data[ 'cmd' ] == "LSTO"):
                     list = eval(data[ "list" ])  # Parametre olarak gelen dict alınıyor
                     mergeTwoDict(server_dict, list)  # server_dict'e gelen dict ekleniyor
@@ -212,7 +212,7 @@ class clientReader(threading.Thread):
                     log = "PUBR mesajı gönderildi."
                     self.logq.put(log)
                     msg = skt.recv(1024).decode()
-                    data = parser(msg, "Y")
+                    data = parser(msg, tip)
                 if(data['cmd'] == "PUBO"):
                     cuuid = iptouid(data_queue['ip'], server_dict)
                     pubkey_dict[ cuuid ]['pubKey'] = data[ 'spubkey' ]
@@ -224,11 +224,12 @@ class clientReader(threading.Thread):
                     log = "PUBC mesajı gönderildi."
                     self.logq.put(log)
                     msg = skt.recv(1024).decode()
-                    data = parser(msg, "Y")
+                    data = parser(msg, tip)
                     if(data['cmd'] == "PUBV"):
                         pubkey_dict[cuuid]['verified'] = "True"
                     if (data['cmd'] == "PUBD"):
                         pubkey_dict[cuuid]['verified'] = "False"
+                    appendToDictionaryFile(pubkey_dict, self.logq, tip, "_pubkey_dict.txt")
             else:
                 print("burayı doldur")
             # inc_parser_client(data, tip, server_dict, )
@@ -258,9 +259,9 @@ class serverThread(threading.Thread):
                 try:
                     print("Recv Server\n")
                     rps = c.recv(1024).decode()
-                    data_rcv = inc_parser_server(rps, self.my_uuid, "yayinci", self.logq, self.peer_dict,
+                    data_rcv = inc_parser_server(rps, self.my_uuid, tip, self.logq, self.peer_dict,
                                                 clientSenderQueue, clientReaderQueue, self.pub_key, c, addr, pubkey_dict)
-                    data = parser(data_rcv, "Y")
+                    data = parser(data_rcv, tip)
                     data_rcv += "\n"
                     print(rps)
                     if(data['status'] == "OK"):
