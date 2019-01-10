@@ -221,7 +221,7 @@ class serverThread(threading.Thread):
                     print("Recv Server\n")
                     rps = c.recv(1024).decode()
                     data_rcv = inc_parser_server(rps, self.my_uuid, "araci", self.logq, self.peer_dict,
-                                                clientSenderQueue, clientReaderQueue, self.pub_key ,c, addr)
+                                                clientSenderQueue, clientReaderQueue, self.pub_key, c, addr)
                     data = parser(data_rcv, "A")
                     data_rcv += "\n"
                     print(rps)
@@ -308,9 +308,6 @@ def main():
     # Burada her şekilde yeni key oluşturuluyor ancak eğer daha önceden oluşmuş key var ise
     # Write_Read_RSAKeys fonskiyonu tarafından okunup rsa_key dict ine yazılıyor.
 
-    rsa_keys = Write_Read_RSAKeys(logQueue, my_uuid)
-    private_key = rsa_keys[ 'privKey' ]
-    public_key = rsa_keys[ 'pubKey' ]
 
     #list_control(server_dict, logQueue, ip, port, my_uuid)
     # #tüm listenin kontrol edilmesini sağlayan fonksiyon
@@ -327,7 +324,7 @@ def main():
     serverCounter = 0
     while True:
         serverReaderQueue.put(s1.accept())
-        server_thread = serverThread("Server Thread - " + str(serverCounter), logQueue, server_dict, my_uuid, public_key)
+        server_thread = serverThread("Server Thread - " + str(serverCounter), logQueue, server_dict, my_uuid, public_key = "")
         server_thread.start()
         serverCounter += 1
 
