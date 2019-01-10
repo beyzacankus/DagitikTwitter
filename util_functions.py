@@ -81,7 +81,7 @@ def encrypte_message(message,receiver_public_key) :
 
 def decrypte_message(encrypted_message,receiver_private_key) :
     decrypted = receiver_private_key.decrypt(encrypted_message)
-    return decrypted.encode()
+    return decrypted.decode()
 
 
 def sign_message(message, private_key):
@@ -144,8 +144,8 @@ def appendToDictionaryFile(data_dict, logq, type, filename): #tüm dict tekrar d
     fid = open(filename, "w")
     fid.write("%s\n" % data_dict)
     fid.flush()
-    #log = type + "tarafından yeni kayıt dosyaya yazıldı: UUID -> "+ data[:14] + "\n" # uuid 'yi alacak şekilde duzenlenmeli
-    #logq.put(log)
+    log = type + "tarafından yeni kayıt dosyaya yazıldı.\n"
+    logq.put(log)
     fid.close()
     
 # Yeni eklenen peer bilgileri ilgili dosyalara kaydediliyor.
