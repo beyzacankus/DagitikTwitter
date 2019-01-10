@@ -360,25 +360,25 @@ def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue,
                     else:
                         data = data_dict['resp2']
                         log = "PUBKEY doğrulanamadı"
-                    log.put(log)
+                    logq.put(log)
 
                 else:
                     data = "AUTH"
             elif(data_dict['cmd'] == omesaj):
                 if ispeer_valid(addr[ 0 ], user_dict):
                     cuuid = iptouid(addr[0], user_dict)
-                    nick = user_dict[uuid]['cnick']
+                    nick = user_dict[cuuid]['cnick']
                     #private_key = RSA.importKey(private_key)
                     mesaj = data_dict['mesaj']
                     dec = decrypte_message(mesaj, private_key)
-                    pm_dict = {
+                    pm_dict[time.time()] = {
                         'nick':str(nick),
                         'msg':str(dec),
                         'date':time.time()
                     }
                     appendToDictionaryFile(pm_dict, logq, tip, "_ozel_mesaj.txt")
                     log = nick + " isimli kullanıcıdan özel mesaj alındı."
-                    log.put(log)
+                    logq.put(log)
                     data = data_dict['resp']
                 else:
                     data = "AUTH"
