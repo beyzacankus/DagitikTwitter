@@ -22,7 +22,7 @@ serverReaderQueue = queue.Queue()
 tip = "yayinci"
 server_dict = readFromDictionaryFile(logQueue, tip, "_peer_dictionary.txt")
 pubkey_dict = readFromDictionaryFile(logQueue, tip, "_pubkey_dict.txt")
-fallow_list = readFromDictionaryFile(logQueue, tip, "_fallow_list.txt")
+follow_list = readFromDictionaryFile(logQueue, tip, "_follow_list.txt")
 
 #  Bir peer icin hem client hem de server var.
 
@@ -198,7 +198,7 @@ class clientReader(threading.Thread):
             else:
                 print("farklı protokol")
                 # inc_parser_client(data, tip, server_dict, )
-                inc_parser_client(data, tip, server_dict,fallow_list, pubkey_dict, clientReaderQueue, clientSenderQueue, self.logq)
+                inc_parser_client(data, tip, server_dict,follow_list, pubkey_dict, clientReaderQueue, clientSenderQueue, self.logq)
                 # inc_parser_client(msg, "A", clientReaderQueue)
 
 

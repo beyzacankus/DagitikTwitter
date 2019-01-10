@@ -319,7 +319,7 @@ def out_parser_client(data, type, my_pub_key, clientSenderQueue, clientReaderQue
     return 1
 
 
-def inc_parser_client(data, type, server_dict, fallow_list, pubkey_dict, clientReaderQueue, clientSenderQueue, logq):
+def inc_parser_client(data, type, server_dict, follow_list, pubkey_dict, clientReaderQueue, clientSenderQueue, logq):
     if (data[ 'status' ] == "OK"):
         if (data[ 'cmd' ] == listo):
             list = data[ "list" ]  # Parametre olarak gelen dict alınıyor
@@ -339,7 +339,7 @@ def inc_parser_client(data, type, server_dict, fallow_list, pubkey_dict, clientR
             pass
         elif (data[ 'cmd' ] == aboneoldun):
             cuuid = data[ 'data_dict' ][ 'cuuid' ]
-            fallow_list.append(cuuid)
+            follow_list.append(cuuid)
 
             log = "Abonelik işlemi başarıyla gerçekleşti\n"
             logq.put(log)
@@ -347,7 +347,7 @@ def inc_parser_client(data, type, server_dict, fallow_list, pubkey_dict, clientR
 
         elif (data[ 'cmd' ] == aboneliktenciktin):
             cuuid = data[ 'data_dict' ][ 'cuuid' ]
-            fallow_list.remove(cuuid)
+            follow_list.remove(cuuid)
 
             log = "Abonelikten çıkma işlemi başarıyla gerçekleşti\n"
             logq.put(log)
