@@ -81,7 +81,7 @@ class Ui_MainWindow(object):
         self.label_12.setGeometry(QtCore.QRect(620, 350, 191, 17))
         self.label_12.setObjectName("label_12")
         self.listView_6 = QtWidgets.QListView(self.centralwidget)
-        self.listView_6.setGeometry(QtCore.QRect(810, 120, 191, 151))
+        self.listView_6.setGeometry(QtCore.QRect(810, 120, 191, 151)) # inbox
         self.listView_6.setObjectName("listView_6")
         self.label_13 = QtWidgets.QLabel(self.centralwidget)
         self.label_13.setGeometry(QtCore.QRect(810, 100, 51, 17))
@@ -89,17 +89,17 @@ class Ui_MainWindow(object):
         self.pushButton_9 = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_9.setGeometry(QtCore.QRect(680, 480, 121, 21))
         self.pushButton_9.setObjectName("pushButton_9")
-        self.listWidget = QtWidgets.QListWidget(self.centralwidget)
+        self.listWidget = QtWidgets.QListWidget(self.centralwidget) #suggested users
         self.listWidget.setGeometry(QtCore.QRect(490, 370, 121, 192))
         self.listWidget.setObjectName("listWidget")
-        self.listWidget_2 = QtWidgets.QListWidget(self.centralwidget)
+        self.listWidget_2 = QtWidgets.QListWidget(self.centralwidget)  # followed
         self.listWidget_2.setGeometry(QtCore.QRect(360, 120, 121, 192))
         self.listWidget_2.setObjectName("listWidget_2")
         self.listWidget_3 = QtWidgets.QListWidget(self.centralwidget)
-        self.listWidget_3.setGeometry(QtCore.QRect(360, 370, 121, 192))
+        self.listWidget_3.setGeometry(QtCore.QRect(360, 370, 121, 192)) # blocked
         self.listWidget_3.setObjectName("listWidget_3")
         self.listWidget_4 = QtWidgets.QListWidget(self.centralwidget)
-        self.listWidget_4.setGeometry(QtCore.QRect(490, 120, 121, 192))
+        self.listWidget_4.setGeometry(QtCore.QRect(490, 120, 121, 192)) # followers
         self.listWidget_4.setObjectName("listWidget_4")
         self.label_14 = QtWidgets.QLabel(self.centralwidget)
         self.label_14.setGeometry(QtCore.QRect(70, 10, 381, 41))
@@ -107,11 +107,11 @@ class Ui_MainWindow(object):
         font.setPointSize(27)
         self.label_14.setFont(font)
         self.label_14.setObjectName("label_14")
-        self.listWidget_5 = QtWidgets.QListWidget(self.centralwidget)
+        self.listWidget_5 = QtWidgets.QListWidget(self.centralwidget) # Feed
         self.listWidget_5.setGeometry(QtCore.QRect(10, 100, 341, 461))
         self.listWidget_5.setObjectName("listWidget_5")
         self.listWidget_6 = QtWidgets.QListWidget(self.centralwidget)
-        self.listWidget_6.setGeometry(QtCore.QRect(810, 320, 191, 261))
+        self.listWidget_6.setGeometry(QtCore.QRect(810, 320, 191, 261)) # My shares
         self.listWidget_6.setObjectName("listWidget_6")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
