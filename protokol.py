@@ -176,6 +176,13 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
                     "status": "NOK",
                     "cmd": microblogistek
                 }
+        elif(command == microblogokey):
+            if (type == yayinci):
+                rdict = {
+                    "status":"OK",
+                    "cmd":microblogokey,
+                    "msg":splitLine[ 1 ].strip()
+                }
         elif (command == aboneol):  # abone olma işlemleri
             if (type == yayinci):
                 rdict = {
@@ -272,7 +279,8 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
 
 
 def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue,
-                      clientreaderqueue, private_key, public_key, soket, addr, pubkey_dict = {}, blocklist = {}, followlist = {}):
+                      clientreaderqueue, private_key, public_key, soket, addr, pm_dict={},
+                      mikro_blog={}, pubkey_dict = {}, blocklist = {}, followlist = {}):
     tip = type
     data_dict = parser(data, tip)
     data = ""
@@ -348,19 +356,51 @@ def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue,
                     sign = check_signature(data_dict['ctext'], data_dict['csigned'], adamin_pub_key)
                     if(sign):
                         data = data_dict['resp1']
+                        log = "PUBKEY doğrulandı"
                     else:
                         data = data_dict['resp2']
+                        log = "PUBKEY doğrulanamadı"
+                    log.put(log)
+
                 else:
                     data = "AUTH"
             elif(data_dict['cmd'] == omesaj):
                 if ispeer_valid(addr[ 0 ], user_dict):
-                    private_key = RSA.importKey(private_key)
+                    cuuid = iptouid(addr[0], user_dict)
+                    nick = user_dict[uuid]['cnick']
+                    #private_key = RSA.importKey(private_key)
                     mesaj = data_dict['mesaj']
                     dec = decrypte_message(mesaj, private_key)
-                    print(dec)
+                    pm_dict = {
+                        'nick':str(nick),
+                        'msg':str(dec),
+                        'date':time.time()
+                    }
+                    appendToDictionaryFile(pm_dict, logq, tip, "_ozel_mesaj.txt")
+                    log = nick + " isimli kullanıcıdan özel mesaj alındı."
+                    log.put(log)
+                    data = data_dict['resp']
                 else:
                     data = "AUTH"
-
+            elif(data_dict['cmd'] == microblogistek):
+                if ispeer_valid(addr[0], user_dict):
+                    cuuid = iptouid(addr[0], user_dict)
+                    count = data_dict['count']
+                    data = {}
+                    for key in mikro_blog:
+                        if (count == 0):
+                            break
+                        else:
+                            count = count-1
+                            data += {
+                                'time':mikro_blog[key]['time'],
+                                'tweet':mikro_blog[key]['tweet']
+                            }
+                    adamin_pub_key = RSA.importKey(pubkey_dict[cuuid]['pubKey'])
+                    enc_mesaj = encrypte_message(data, adamin_pub_key)
+                    data = data_dict['resp'] + " "+ enc_mesaj
+                else:
+                    data = "AUTH"
         else:
             data = "BANN"
     else:
@@ -376,7 +416,7 @@ def out_parser_client(command, uuid, type, logq, user_dict,  clientsenderqueue,
                         pubkey_dict = {}, blocklist = {}, followlist = {}):
     tip = type
     data_dict = parser(command['data'], tip)
-
+    data = ""
     if (data_dict[ 'status' ] == "NOK"):
         if (data_dict[ 'cmd' ] == ban):
             ip = user_dict[uuid]['cip']
@@ -422,12 +462,24 @@ def out_parser_client(command, uuid, type, logq, user_dict,  clientsenderqueue,
                 'port': port,
                 'cmd': data_dict[ 'cmd' ] + " " + enc_mesaj
             }
+        elif(data_dict['cmd'] == tweet):
+            mesaj = data_dict['text']
+            adamin_pub_key = RSA.importKey(pubkey_dict[uuid]['pubKey'])
+            enc_mesaj = encrypte_message(mesaj,adamin_pub_key)
+            for keys in user_dict:
+                tivit = {
+                    'server_flag':"0",
+                    'ip':user_dict[keys]['cip'],
+                    'port':user_dict[keys]['cport'],
+                    'cmd': data_dict['cmd'] + " " + enc_mesaj
+                }
+                clientsenderqueue.put(tivit)
+
+    if(data != ""):
+        clientsenderqueue.put(data)
 
 
-    clientsenderqueue.put(data)
-
-
-def inc_parser_client(data, type, server_dict, follow_list, pubkey_dict, clientReaderQueue, clientSenderQueue, logq):
+def inc_parser_client(data, ip, type, logq, server_dict, clientReaderQueue, clientSenderQueue, private_key, feeds={},follow_list={}, pubkey_dict={}, ):
     if (data[ 'status' ] == "OK"):
         if (data[ 'cmd' ] == pubkeygitsin):
             # gelen pub_key i alacak server_dict te ekleyecek fonksiyon
@@ -436,7 +488,12 @@ def inc_parser_client(data, type, server_dict, follow_list, pubkey_dict, clientR
             appendToDictionaryFile(pubkey_dict, logq, type, "_pubkey_dict.txt")
 
         elif (data[ 'cmd' ] == microblogokey):
-            pass
+            enc_msg = data['msg']
+            dec = decrypte_message(enc_msg, private_key)
+            cuuid = iptouid(ip, server_dict)
+            feeds[cuuid] = dec
+            appendToDictionaryFile(feeds, logq, type, "_all_feeds.txt")
+
         elif (data[ 'cmd' ] == aboneoldun):
             cuuid = data[ 'data_dict' ][ 'cuuid' ]
             follow_list.append(cuuid)
