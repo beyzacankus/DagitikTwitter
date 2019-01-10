@@ -354,14 +354,15 @@ def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue,
     return data
 
 
-def out_parser_client(data, uuid, type, logq, user_dict,  clientsenderqueue,
+def out_parser_client(command, uuid, type, logq, user_dict,  clientsenderqueue,
                         pubkey_dict = {}, blocklist = {}, followlist = {}):
     tip = type
-    data_dict = parser(data, tip)
-    ip = user_dict[ uuid ][ 'cip' ]
-    port = user_dict[ uuid ][ 'cport' ]
+    data_dict = parser(command['data'], tip)
+
     if (data_dict[ 'status' ] == "NOK"):
         if (data_dict[ 'cmd' ] == ban):
+            ip = user_dict[uuid]['cip']
+            port = user_dict[uuid]['cport']
             blocklist[ uuid ] = "blocked"
             appendToDictionaryFile(blocklist, logq, tip, "_block_list.txt")
             data = {
@@ -374,11 +375,22 @@ def out_parser_client(data, uuid, type, logq, user_dict,  clientsenderqueue,
             logq.put(log)
     else:
         if(data_dict['cmd'] == microblogistek):
+            ip = user_dict[uuid]['cip']
+            port = user_dict[uuid]['cport']
             data = {
                 'server_flag':"0",
                 'ip':ip,
                 'port':port,
                 'cmd':data_dict['cmd'] + " " + data_dict['count']
+            }
+        elif(data_dict['cmd'] == merhaba):
+            ip = command['to_ip']
+            port = command['to_port']
+            data = {
+                'server_flag': "0",
+                'ip': ip,
+                'port': port,
+                'cmd': command['data']
             }
 
     clientsenderqueue.put(data)
