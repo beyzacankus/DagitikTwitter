@@ -40,7 +40,7 @@ class Test_Ui(QtWidgets.QMainWindow):
         # girilen nickname ' i al
         user_nickname = self.ui.plainTextEdit.toPlainText()
         to_ip = "192.168.1.108"
-        to_port = 5457
+        to_port = 5662
 
         data = "HELO " + my_uuid + " " + self.my_ip + " " + str(self.my_port) + " " + tip + " " + user_nickname
 
@@ -118,6 +118,19 @@ class Test_Ui(QtWidgets.QMainWindow):
 
     def send_message(self):
         message_body_data = self.ui.plainTextEdit_5.toPlainText()
+        to_ip = "192.168.1.108"
+        to_port = 5662
+
+        data = "PRIV "+message_body_data
+
+        command = {
+            "to_ip" : to_ip,
+            "to_port" : to_port,
+            "data" : data
+        }
+
+
+        out_parser_client(command, my_uuid, tip,logQueue,server_dict, clientSenderQueue, pubkey_dict, block_list,follow_list)
 
         pass
 
