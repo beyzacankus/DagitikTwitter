@@ -280,7 +280,7 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
 
 def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue,
                       clientreaderqueue, private_key, public_key, soket, addr, pm_dict={},
-                      mikro_blog={}, pubkey_dict = {}, blocklist = {}, followlist = {}):
+                      mikro_blog={}, pubkey_dict = {}, blocklist = {}, followlist = {}, followerlist={}):
     tip = type
     data_dict = parser(data, tip)
     data = ""
@@ -401,6 +401,17 @@ def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue,
                     data = data_dict['resp'] + " "+ enc_mesaj
                 else:
                     data = "AUTH"
+            elif(data_dict['cmd'] == aboneol):
+                if ispeer_valid(addr[0], user_dict):
+                    cuuid = iptouid(addr[0], user_dict)
+                    followerlist[cuuid] = {
+                        'nick':user_dict[cuuid]['cnick'],
+                        'followed':"yes"
+                    }
+                    appendToDictionaryFile(followerlist, logq, tip, "_follower_list.txt")
+                    data=data_dict['resp']
+                else:
+                    data = "AUTH"
         else:
             data = "BANN"
     else:
@@ -474,6 +485,15 @@ def out_parser_client(command, uuid, type, logq, user_dict,  clientsenderqueue,
                     'cmd': data_dict['cmd'] + " " + enc_mesaj
                 }
                 clientsenderqueue.put(tivit)
+        elif(data_dict['cmd'] == aboneol):
+            ip = user_dict[ uuid ][ 'cip' ]
+            port = user_dict[ uuid ][ 'cport' ]
+            data = {
+                'server_flag': "0",
+                'ip': ip,
+                'port': port,
+                'cmd': data_dict[ 'cmd' ]
+            }
 
     if(data != ""):
         clientsenderqueue.put(data)
