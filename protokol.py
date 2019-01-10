@@ -112,13 +112,12 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
                     "status": "NOK",
                     "cmd": pubkeygeldi
                 }
-        elif (
-                command == pubkeygitsin):  # cpubkey ile gelen pubkey i alıyoruz. gönderim yaparken kendi pubkey imizi göndereceğiz.
+        elif (command == pubkeygitsin):  # cpubkey ile gelen pubkey i alıyoruz. gönderim yaparken kendi pubkey imizi göndereceğiz.
             if (type == yayinci):
                 rdict = {
                     "status": "OK",
                     "cmd": pubkeygitsin,
-                    "spubkey": data[ 5: ]
+                    "spubkey": data[ 5: ].strip()
                 }
             else:
                 rdict = {
@@ -250,7 +249,7 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
     return rdict
 
 
-def inc_parser_server(data, suuid, type, logq, user_dict, clientsenderqueue, clientreaderqueue, public_key, soket, addr):
+def inc_parser_server(data, suuid, type, logq, user_dict, pubkey_dict, clientsenderqueue, clientreaderqueue, public_key, soket, addr):
     if (type == "araci"):
         tip = araci
     else:
@@ -300,10 +299,13 @@ def inc_parser_server(data, suuid, type, logq, user_dict, clientsenderqueue, cli
         elif (data_dict[ 'cmd' ] == pubkeygeldi):
             if ispeer_valid(addr[ 0 ], user_dict):
                 r_pub_key = data_dict[ 'cpubkey' ]
-
+                cuuid = iptouid(addr[0], user_dict)
+                pubkey_dict[ cuuid ] = r_pub_key
+                log = str(cuuid) + " public Key eklendi."
+                logq.put(log)
+                print(log)
                 print("Public key gönderime hazır" + data + "\n")
                 data = data_dict[ 'resp' ] + " " + str(public_key)
-
             else:
                 data = "AUTH"
     else:
@@ -316,6 +318,7 @@ def inc_parser_server(data, suuid, type, logq, user_dict, clientsenderqueue, cli
 
 
 def out_parser_client(data, type, my_pub_key, clientSenderQueue, clientReaderQueue):
+
     return 1
 
 
