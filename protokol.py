@@ -305,7 +305,7 @@ def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue, cl
                 logq.put(log)
                 print(log)
                 print("Public key gönderime hazır" + data + "\n")
-                data = data_dict[ 'resp' ] + " " + str(public_key)
+                data = data_dict[ 'resp' ] + " " + str(public_key.exportKey("PEM").decode())
             else:
                 data = "AUTH"
     else:
