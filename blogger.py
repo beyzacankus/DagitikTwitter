@@ -23,6 +23,7 @@ tip = "yayinci"
 server_dict = readFromDictionaryFile(logQueue, tip, "_peer_dictionary.txt")
 pubkey_dict = readFromDictionaryFile(logQueue, tip, "_pubkey_dict.txt")
 follow_list = readFromDictionaryFile(logQueue, tip, "_follow_list.txt")
+block_list = readFromDictionaryFile(logQueue, tip, "_block_list.txt")
 
 # MAC adresiyle UUID
 my_uuid = str(uuid.getnode())
@@ -260,7 +261,7 @@ class serverThread(threading.Thread):
                     print("Recv Server\n")
                     rps = c.recv(1024).decode()
                     data_rcv = inc_parser_server(rps, self.my_uuid, tip, self.logq, self.peer_dict,
-                                                clientSenderQueue, clientReaderQueue, self.pub_key, c, addr, pubkey_dict)
+                                                clientSenderQueue, clientReaderQueue, self.pub_key, c, addr, pubkey_dict, block_list, follow_list)
                     data = parser(data_rcv, tip)
                     data_rcv += "\n"
                     print(rps)
@@ -353,7 +354,8 @@ def main():
     client_thread.start()
     client_dict_thread = clientDictThread(server_dict, logQueue, ip, port, my_uuid)
     client_dict_thread.start()
-
+    #out_parser_client("BANN", "57407536053104", tip, logQueue, server_dict, clientSenderQueue,
+                      #pubkey_dict, block_list, follow_list)
     # server name icin
     serverCounter = 0
     while True:
