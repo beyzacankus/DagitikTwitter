@@ -212,6 +212,7 @@ class serverThread(threading.Thread):
             logQueue.put('Got connection from ' + str(addr))
             print(addr[0])
             print("Soket Server\n")
+
             while True:
 
                 try:
