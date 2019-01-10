@@ -18,10 +18,11 @@ from ui.dagitik_twitter_ui import Ui_MainWindow
 
 
 class Test_Ui(QtWidgets.QMainWindow):
-    def __init__(self):
+    def __init__(self, my_ip, my_port):
         self.qt_app = QtWidgets.QApplication(sys.argv)
         QtWidgets.QWidget.__init__(self, None)
-
+        self.my_ip = my_ip
+        self.my_port = my_port
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
@@ -38,8 +39,22 @@ class Test_Ui(QtWidgets.QMainWindow):
     def connect_to_twitter(self):
         # girilen nickname ' i al
         user_nickname = self.ui.plainTextEdit.toPlainText()
+        to_ip = "192.168.1.108"
+        to_port = 5457
+
+        data = "HELO " + my_uuid + " " + self.my_ip + " " + str(self.my_port) + " " + tip + " " + user_nickname
+
+        command = {
+            "to_ip" : to_ip,
+            "to_port" : to_port,
+            "data" : data
+        }
+
+
+        out_parser_client(command, my_uuid, tip,logQueue,server_dict, clientSenderQueue, pubkey_dict, block_list,follow_list)
         print(user_nickname)
         self.ui.label_2.setText(user_nickname)
+        print(my_uuid)
 
 
         # Yayıncı peer oluştur veya yayıncı peerına bağlan
@@ -116,11 +131,13 @@ class Test_Ui(QtWidgets.QMainWindow):
 
 
 class OnYuzThread(threading.Thread):
-    def __init__(self):
+    def __init__(self, ip, port):
         threading.Thread.__init__(self)
+        self.ip = ip
+        self.port = port
 
     def run(self):
-        app = Test_Ui()
+        app = Test_Ui(self.ip, self.port)
         app.run()
 
 def main():
@@ -156,7 +173,7 @@ def main():
     client_dict_thread = clientDictThread(server_dict, logQueue, ip, port, my_uuid)
     client_dict_thread.start()
 
-    OnYuz = OnYuzThread()
+    OnYuz = OnYuzThread(ip, port)
     OnYuz.start()
 
     # server name icin
