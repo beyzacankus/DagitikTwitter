@@ -322,7 +322,9 @@ def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue, cl
             if ispeer_valid(addr[ 0 ], user_dict):
                 r_pub_key = data_dict[ 'cpubkey' ]
                 cuuid = iptouid(addr[0], user_dict)
-                pubkey_dict[ cuuid ] = r_pub_key
+                pubkey_dict[ cuuid ] = {
+                    'pubKey': r_pub_key
+                }
                 appendToDictionaryFile(pubkey_dict, logq, tip, "_pubkey_dict.txt")
                 log = str(cuuid) + " public Key eklendi."
                 logq.put(log)
@@ -333,7 +335,7 @@ def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue, cl
                 data = "AUTH"
         elif (data_dict['cmd'] == pubkeycontrol):
             if ispeer_valid(addr[ 0 ], user_dict):
-                adamin_pub_key = RSA.importKey(pubkey_dict[data_dict['ctext']])
+                adamin_pub_key = RSA.importKey(pubkey_dict[data_dict['ctext']]['pubKey'])
                 sign = check_signature(data_dict['ctext'], data_dict['csigned'], adamin_pub_key)
                 if(sign):
                     data = data_dict['resp1']
@@ -358,7 +360,7 @@ def inc_parser_client(data, type, server_dict, follow_list, pubkey_dict, clientR
         if (data[ 'cmd' ] == pubkeygitsin):
             # gelen pub_key i alacak server_dict te ekleyecek fonksiyon
             cuuid = data[ 'data_dict' ][ 'cuuid' ]
-            pubkey_dict[ cuuid ] = data[ 'spubkey' ]
+            pubkey_dict[ cuuid ]['pubKey'] = data[ 'spubkey' ]
             appendToDictionaryFile(pubkey_dict, logq, type, "_pubkey_dict.txt")
 
         elif (data[ 'cmd' ] == microblogokey):
