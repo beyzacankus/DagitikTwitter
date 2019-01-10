@@ -75,10 +75,11 @@ def update_public_key_dictionary(uuid, public_key) :
 
 def encrypte_message(message,receiver_public_key) :
     encrypted = receiver_public_key.encrypt(message.encode(), 64)
-    return encrypted
+    return b64encode(encrypted[0]).decode()
 
 
 def decrypte_message(encrypted_message,receiver_private_key) :
+    encrypted_message = b64decode(encrypted_message)
     decrypted = receiver_private_key.decrypt(encrypted_message)
     return decrypted.decode()
 
