@@ -217,3 +217,12 @@ def iptouid(ip, user_dict):
             user_id = keys
 
     return user_id
+
+def nicktouid(nick, user_dict):
+    user_id = False
+    for keys in user_dict:
+        if user_dict[keys ][ 'cnick' ] == str(nick):
+            user_id = keys
+
+    return user_id
+
