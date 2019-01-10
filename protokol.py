@@ -414,7 +414,7 @@ def out_parser_client(command, uuid, type, logq, user_dict,  clientsenderqueue,
             ip = user_dict[ uuid ][ 'cip' ]
             port = user_dict[ uuid ][ 'cport' ]
             mesaj = data_dict['mesaj']
-            adamin_pub_key = RSA.importKey(pubkey_dict[uuid])
+            adamin_pub_key = RSA.importKey(pubkey_dict[uuid]['pubKey'])
             enc_mesaj = encrypte_message(mesaj,adamin_pub_key)
             data = {
                 'server_flag': "0",
