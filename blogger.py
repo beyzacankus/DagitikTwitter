@@ -24,6 +24,18 @@ server_dict = readFromDictionaryFile(logQueue, tip, "_peer_dictionary.txt")
 pubkey_dict = readFromDictionaryFile(logQueue, tip, "_pubkey_dict.txt")
 follow_list = readFromDictionaryFile(logQueue, tip, "_follow_list.txt")
 
+# MAC adresiyle UUID
+my_uuid = str(uuid.getnode())
+print(my_uuid)
+
+# Public ve private keyler
+# Burada her şekilde yeni key oluşturuluyor ancak eğer daha önceden oluşmuş key var ise
+# Write_Read_RSAKeys fonskiyonu tarafından okunup rsa_key dict ine yazılıyor.
+rsa_keys = Write_Read_RSAKeys(logQueue, my_uuid)
+private_key = rsa_keys[ 'privKey' ]
+public_key = rsa_keys[ 'pubKey' ]
+print(private_key.exportKey("PEM").decode())
+print(public_key.exportKey("PEM").decode())
 #  Bir peer icin hem client hem de server var.
 
 #  Peer'in client tarafi tanimlaniyor.
@@ -130,6 +142,7 @@ class clientSender(threading.Thread):
             skt.send((data['cmd'] + "\n").encode())
             command = {
                 'skt': skt,
+                'ip':ip
             }
             if (data['server_flag'] == "1"):
                 command['server_soket'] = data['soket']
@@ -169,7 +182,7 @@ class clientReader(threading.Thread):
                 data['data_dict'] = data_queue['data_dict']
             print(data)
             if (data[ 'cmd' ] == "AUID" or data[ 'cmd' ] == "WAIT" or data[ 'cmd' ] == "WLCM" or data[
-                'cmd' ] == "LSTO"):
+                'cmd' ] == "LSTO" or data['cmd'] == "PUBO"):
                 if (data[ 'cmd' ] == "AUID"):
                     clientToServerQueue.put(data)
                     client_toserver = clientToServer("Client to Server - " + str(csCounter), self.logq)
@@ -180,14 +193,14 @@ class clientReader(threading.Thread):
                     self.logq.put(log)
                     print(log)
                     msg = skt.recv(1024).decode()
-                    data = parser(msg, "A")
+                    data = parser(msg, "Y")
                 if (data[ 'cmd' ] == "WLCM"):
                     log = "WLCM received"
                     self.logq.put(log)
                     print(log)
                     skt.send(("LIST\r\n").encode())
                     msg = skt.recv(1024).decode()
-                    data = parser(msg, "A")
+                    data = parser(msg, "Y")
                 if (data[ 'cmd' ] == "LSTO"):
                     list = eval(data[ "list" ])  # Parametre olarak gelen dict alınıyor
                     mergeTwoDict(server_dict, list)  # server_dict'e gelen dict ekleniyor
@@ -195,6 +208,17 @@ class clientReader(threading.Thread):
                     self.logq.put(log)
                     appendToDictionaryFile(server_dict, self.logq, tip, "_peer_dictionary.txt")
                     print("Peerdan alınan liste sözlüğe eklendi\n")
+                    skt.send(("PUBR "+str(public_key.exportKey("PEM").decode()) +"\r\n").encode())
+                    #print(str(public_key.exportKey("PEM").decode()))
+                    msg = skt.recv(1024).decode()
+                    data = parser(msg, "Y")
+                if(data['cmd'] == "PUBO"):
+                    cuuid = iptouid(data_queue['ip'], server_dict)
+                    pubkey_dict[ cuuid ] = data[ 'spubkey' ]
+                    appendToDictionaryFile(pubkey_dict, self.logq, tip, "_pubkey_dict.txt")
+                    log = str(cuuid) + " public Key eklendi."
+                    self.logq.put(log)
+                    print(log)
             else:
                 print("burayı doldur")
             # inc_parser_client(data, tip, server_dict, )
@@ -224,7 +248,7 @@ class serverThread(threading.Thread):
                 try:
                     print("Recv Server\n")
                     rps = c.recv(1024).decode()
-                    data_rcv = inc_parser_server(rps, self.my_uuid, "yayinci", self.logq, self.peer_dict,
+                    data_rcv = inc_parser_server(rps, self.my_uuid, "yayinci", self.logq, self.peer_dict, pubkey_dict,
                                                 clientSenderQueue, clientReaderQueue, self.pub_key, c, addr)
                     data = parser(data_rcv, "Y")
                     data_rcv += "\n"
@@ -306,16 +330,7 @@ def main():
     # Kullanıcı kayıtlarının tutulacağı dictionary
     # write_dictionary ile text dosyası çağırılıp önceki kayıtlar dictionary içerisine yazılıyor
 
-    # MAC adresiyle UUID
-    my_uuid = str(uuid.getnode())
-    print(my_uuid)
 
-    # Public ve private keyler
-    # Burada her şekilde yeni key oluşturuluyor ancak eğer daha önceden oluşmuş key var ise
-    # Write_Read_RSAKeys fonskiyonu tarafından okunup rsa_key dict ine yazılıyor.
-    rsa_keys = Write_Read_RSAKeys(logQueue, my_uuid)
-    private_key = rsa_keys[ 'privKey' ]
-    public_key = rsa_keys[ 'pubKey' ]
 
     # list_control(server_dict, logQueue, ip, port, my_uuid)
     # #tüm listenin kontrol edilmesini sağlayan fonksiyon
