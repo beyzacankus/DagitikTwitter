@@ -168,39 +168,36 @@ class clientReader(threading.Thread):
                 data['server_soket'] = data_queue['server_soket']
                 data['data_dict'] = data_queue['data_dict']
             print(data)
-
-            if (data['cmd'] == "AUID"):
-                clientToServerQueue.put(data)
-                client_toserver = clientToServer("Client to Server - " + str(csCounter), self.logq)
-                client_toserver.start()
-                csCounter += 1
-            if (data['cmd'] == "WAIT"):
-                log = "Waiting for HELO connection."
-                self.logq.put(log)
-                print(log)
-                msg = skt.recv(1024).decode()
-                data = parser(msg, "Y")
-            if (data['cmd'] == "WLCM"):
-                log = "WLCM received"
-                self.logq.put(log)
-                print(log)
-                skt.send(("LIST\r\n").encode())
-                msg = skt.recv(1024).decode()
-                data = parser(msg, "Y")
-            if (data['cmd'] == "LSTO"):
-                list = eval(data["list"])  # Parametre olarak gelen dict alınıyor
-                mergeTwoDict(server_dict, list)  # server_dict'e gelen dict ekleniyor
-                log = "Gelen peer listesi asıl listeye eklendi"
-                self.logq.put(log)
-                appendToDictionaryFile(server_dict, self.logq, tip, "_peer_dictionary.txt")
-                print("Peerdan alınan liste sözlüğe eklendi\n")
-                print(server_dict)
+            if (data[ 'cmd' ] == "AUID" or data[ 'cmd' ] == "WAIT" or data[ 'cmd' ] == "WLCM" or data[
+                'cmd' ] == "LSTO"):
+                if (data[ 'cmd' ] == "AUID"):
+                    clientToServerQueue.put(data)
+                    client_toserver = clientToServer("Client to Server - " + str(csCounter), self.logq)
+                    client_toserver.start()
+                    csCounter += 1
+                if (data[ 'cmd' ] == "WAIT"):
+                    log = "Waiting for HELO connection."
+                    self.logq.put(log)
+                    print(log)
+                    msg = skt.recv(1024).decode()
+                    data = parser(msg, "A")
+                if (data[ 'cmd' ] == "WLCM"):
+                    log = "WLCM received"
+                    self.logq.put(log)
+                    print(log)
+                    skt.send(("LIST\r\n").encode())
+                    msg = skt.recv(1024).decode()
+                    data = parser(msg, "A")
+                if (data[ 'cmd' ] == "LSTO"):
+                    list = eval(data[ "list" ])  # Parametre olarak gelen dict alınıyor
+                    mergeTwoDict(server_dict, list)  # server_dict'e gelen dict ekleniyor
+                    log = "Gelen peer listesi asıl listeye eklendi"
+                    self.logq.put(log)
+                    appendToDictionaryFile(server_dict, self.logq, tip, "_peer_dictionary.txt")
+                    print("Peerdan alınan liste sözlüğe eklendi\n")
             else:
-                print("farklı protokol")
-                # inc_parser_client(data, tip, server_dict, )
-                inc_parser_client(data, tip, server_dict,follow_list, pubkey_dict, clientReaderQueue, clientSenderQueue, self.logq)
-                # inc_parser_client(msg, "A", clientReaderQueue)
-
+                print("burayı doldur")
+            # inc_parser_client(data, tip, server_dict, )
 
 # Server için thread
 class serverThread(threading.Thread):
@@ -217,33 +214,34 @@ class serverThread(threading.Thread):
         self.logq.put(log)
 
         while not serverReaderQueue.empty():
-            soket = serverReaderQueue.get()
-            c = soket['c']
-            addr = soket['addr']
+            c, addr = serverReaderQueue.get()
+            logQueue.put('Got connection from ' + str(addr))
+            print(addr[0])
             print("Soket Server\n")
 
-            # Kullanıcı kayıt olup olmadığı flag ile tutuluyor
-            flag = 1
-            c_uuid = ""
             while True:
 
                 try:
                     print("Recv Server\n")
                     rps = c.recv(1024).decode()
                     data_rcv = inc_parser_server(rps, self.my_uuid, "yayinci", self.logq, self.peer_dict,
-                                                 flag, clientSenderQueue, clientReaderQueue, self.pub_key, c)
+                                                clientSenderQueue, clientReaderQueue, self.pub_key, c, addr)
                     data = parser(data_rcv, "Y")
                     data_rcv += "\n"
                     print(rps)
-                    if (data['status'] == "OK"):
+                    if(data['status'] == "OK"):
                         c.send(data_rcv.encode())
                     else:
+                        c.send(data_rcv.encode())
+                        c.close()
                         break
                 except Exception as e:
                     log = self.name + " got Exception -- " + str(e)
                     self.logq.put(log)
                     print(log)
-
+                    break #hatalı durumlarda protokol.py içerisinde close
+        log = tip + " " + self.name + " kapandi\n"
+        self.logq.put(log)
 
 class clientToServer(threading.Thread):
     def __init__(self, name, logq):
@@ -270,8 +268,7 @@ class clientToServer(threading.Thread):
                         "cport": data_dict['cport'],
                         "ctype": data_dict["ctype"],
                         "cnick": data_dict["cnick"],
-                        "last_login": datetime.utcfromtimestamp(time.time()).strftime("%m/%d/%Y %H:%M:%S"),
-
+                        "last_login":time.time()
 
                     # time değeri float cinsinde atılıyor. Bu değeri datetime cinsine dönüştürmek için datetime.datetime.fromtimestamp(x) fonksiyonu verilmeli ve x yerine float değer yazılmalı
                         # pubkey eklenecek
@@ -280,7 +277,6 @@ class clientToServer(threading.Thread):
                     appendToDictionaryFile(server_dict, self.logq, "yayinci", "_peer_dictionary.txt")
                     data = data_dict['resp2'] + " " + data_dict['cuuid']
                     c.send(data.encode())
-                    flag = 1
                 else:
                     log = "AUID WAIT eşleşmesi yapılamadı\n"
                     self.logq.put(log)
