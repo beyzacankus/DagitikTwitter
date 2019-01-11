@@ -222,7 +222,10 @@ class clientReader(threading.Thread):
                     data = parser(msg, tip)
                 if(data['cmd'] == "PUBO"):
                     cuuid = iptouid(data_queue['ip'], server_dict)
-                    pubkey_dict[ cuuid ]['pubKey'] = data[ 'spubkey' ]
+                    pubkey_dict[ cuuid ]={
+                            'pubKey' : data[ 'spubkey' ]
+                    }
+
                     appendToDictionaryFile(pubkey_dict, self.logq, tip, "_pubkey_dict.txt")
                     log = str(cuuid) + " public Key eklendi."
                     self.logq.put(log)
