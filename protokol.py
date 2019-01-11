@@ -285,7 +285,7 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
 
 
 def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue,
-                      clientreaderqueue, private_key, public_key, soket, addr, pm_dict={},
+                      clientreaderqueue, soket, addr, pm_dict={}, private_key="", public_key="",
                       mikro_blog={}, pubkey_dict = {}, blocklist = {}, followlist = {}, followerlist={}, feeds={}):
     tip = type
     data_dict = parser(data, tip)
