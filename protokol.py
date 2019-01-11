@@ -290,6 +290,7 @@ def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue,
     tip = type
     data_dict = parser(data, tip)
     data = ""
+    cuuid = ""
     if (data_dict[ 'status' ] == "OK"):
         #flag=False
         if(user_dict == {}):
