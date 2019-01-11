@@ -39,8 +39,8 @@ print(my_uuid)
 rsa_keys = Write_Read_RSAKeys(logQueue, my_uuid)
 private_key = rsa_keys[ 'privKey' ]
 public_key = rsa_keys[ 'pubKey' ]
-print(private_key.exportKey("PEM").decode())
-print(public_key.exportKey("PEM").decode())
+#print(private_key.exportKey("PEM").decode())
+#print(public_key.exportKey("PEM").decode())
 #  Bir peer icin hem client hem de server var.
 
 #  Peer'in client tarafi tanimlaniyor.
