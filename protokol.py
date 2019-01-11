@@ -195,6 +195,12 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
                     "status": "NOK",
                     "cmd": aboneol
                 }
+        elif(command == aboneoldun):
+            if (type == yayinci):
+                rdict = {
+                    "status":"OK",
+                    "cmd":aboneoldun
+                }
         elif (command == aboneliktencik):  # abonelikten cikma islemleri
             if (type == yayinci):
                 rdict = {
@@ -280,7 +286,7 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
 
 def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue,
                       clientreaderqueue, private_key, public_key, soket, addr, pm_dict={},
-                      mikro_blog={}, pubkey_dict = {}, blocklist = {}, followlist = {}, followerlist={}):
+                      mikro_blog={}, pubkey_dict = {}, blocklist = {}, followlist = {}, followerlist={}, feeds={}):
     tip = type
     data_dict = parser(data, tip)
     data = ""
@@ -412,6 +418,18 @@ def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue,
                     data=data_dict['resp']
                 else:
                     data = "AUTH"
+            elif(data_dict['cmd'] == tweet):
+                if ispeer_valid(addr[0], user_dict):
+                    cuuid = iptouid(addr[0], user_dict)
+                    mesaj = data_dict['text']
+                    dec = decrypte_message(mesaj, private_key)
+                    feeds[cuuid]['tweets'] = dec
+                    appendToDictionaryFile(feeds, logq, type, "_all_feeds.txt")
+
+                    data=data_dict['resp']
+
+                else:
+                    data = "AUTH"
         else:
             data = "BANN"
     else:
@@ -511,7 +529,7 @@ def inc_parser_client(data, ip, type, logq, server_dict, clientReaderQueue, clie
             enc_msg = data['msg']
             dec = decrypte_message(enc_msg, private_key)
             cuuid = iptouid(ip, server_dict)
-            feeds[cuuid] = dec
+            feeds[cuuid]['mikroblog'] = dec
             appendToDictionaryFile(feeds, logq, type, "_all_feeds.txt")
 
         elif (data[ 'cmd' ] == aboneoldun):
