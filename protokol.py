@@ -285,7 +285,7 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
 
 
 def inc_parser_server(data, suuid, type, logq, user_dict,  clientsenderqueue,
-                      clientreaderqueue, soket, addr, pm_dict={}, private_key="", public_key="",
+                      clientreaderqueue, soket, addr, private_key="", public_key="", pm_dict={},
                       mikro_blog={}, pubkey_dict = {}, blocklist = {}, followlist = {}, followerlist={}, feeds={}):
     tip = type
     data_dict = parser(data, tip)
@@ -534,17 +534,12 @@ def inc_parser_client(data, ip, type, logq, server_dict, clientReaderQueue, clie
             appendToDictionaryFile(feeds, logq, type, "_all_feeds.txt")
 
         elif (data[ 'cmd' ] == aboneoldun):
-            cuuid = data[ 'data_dict' ][ 'cuuid' ]
-            follow_list.append(cuuid)
 
             log = "Abonelik işlemi başarıyla gerçekleşti\n"
             logq.put(log)
             print("Abonelik işlemi başarıyla gerçekleşti\n")
 
         elif (data[ 'cmd' ] == aboneliktenciktin):
-            cuuid = data[ 'data_dict' ][ 'cuuid' ]
-            follow_list.remove(cuuid)
-
             log = "Abonelikten çıkma işlemi başarıyla gerçekleşti\n"
             logq.put(log)
             print("Abonelikten çıkma işlemi başarıyla gerçekleşti\n")

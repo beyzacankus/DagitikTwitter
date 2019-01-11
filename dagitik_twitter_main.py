@@ -44,8 +44,8 @@ class Test_Ui(QtWidgets.QMainWindow):
     def connect_to_twitter(self):
         # girilen nickname ' i al
         user_nickname = self.ui.plainTextEdit.toPlainText()
-        to_ip = "192.168.1.108"
-        to_port = 5662
+        to_ip = "172.20.10.8"
+        to_port = 4569
 
         data = "HELO " + my_uuid + " " + self.my_ip + " " + str(self.my_port) + " " + tip + " " + user_nickname
 
@@ -59,6 +59,9 @@ class Test_Ui(QtWidgets.QMainWindow):
         print(user_nickname)
         self.ui.label_2.setText(user_nickname)
         print(my_uuid)
+
+        for keys in server_dict:
+            self.ui.listWidget.addItem(server_dict[keys]['cnick'])
 
 
         # Yayıncı peer oluştur veya yayıncı peerına bağlan
@@ -168,7 +171,8 @@ class Test_Ui(QtWidgets.QMainWindow):
 
         out_parser_client(command, uuid, tip,logQueue,server_dict, clientSenderQueue, pubkey_dict, block_list,follow_list)
 
-        pass
+        for keys in server_dict:
+            self.ui.listWidget.addItem(server_dict[keys]['cnick'])
 
     def refresh_feed(self):
 
