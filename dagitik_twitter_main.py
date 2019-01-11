@@ -37,6 +37,10 @@ class Test_Ui(QtWidgets.QMainWindow):
         self.ui.pushButton_9.pressed.connect(self.send_message)
         self.ui.pushButton_5.pressed.connect(self.share_context)
         self.ui.pushButton_8.pressed.connect(self.refresh_feed)
+
+        for keys in server_dict:
+            self.ui.listWidget.addItem(server_dict[keys]['cnick'])
+
     def connect_to_twitter(self):
         # girilen nickname ' i al
         user_nickname = self.ui.plainTextEdit.toPlainText()
@@ -110,11 +114,21 @@ class Test_Ui(QtWidgets.QMainWindow):
         pass
 
     def subscribe(self):
-        self.ui.listWidget_6.addItem("Emre")
-        self.ui.listWidget_6.addItem("Emre2")
-        self.ui.listWidget_6.addItem("Emre3")
+        user_name = self.ui.listWidget.currentItem().text()
+        cuuid = nicktouid(user_name, server_dict)
+        follow_list[cuuid] = {
+            'nick':user_name,
+            'followed':"yes"
+        }
+        appendToDictionaryFile(follow_list, logQueue, tip, "_follow_list.txt")
+        command = {
+            'data':"SUBS"
+        }
+        out_parser_client(command, cuuid, tip, logQueue, server_dict, clientSenderQueue, pubkey_dict, block_list,
+                          follow_list)
+        for keys in follow_list:
+            self.ui.listWidget_2.addItem(follow_list[keys]['nick'])
 
-        pass
 
     def share_context(self):
         tweet_data = self.ui.plainTextEdit_4.toPlainText()
@@ -140,7 +154,7 @@ class Test_Ui(QtWidgets.QMainWindow):
         message_body_data = self.ui.plainTextEdit_5.toPlainText()
         to_ip = "192.168.1.108"
         to_port = 5662
-        nick = "yayinci57407536053104"
+        nick = self.ui.listWidget_2.currentItem().text()
         uuid = nicktouid(nick, server_dict)
 
         data = "PRIV "+message_body_data
@@ -159,8 +173,15 @@ class Test_Ui(QtWidgets.QMainWindow):
     def refresh_feed(self):
 
 
+        command = {
+            "data":"MBLR 10"
+        }
 
-        pass
+        out_parser_client(command, my_uuid, tip, logQueue, server_dict, clientSenderQueue, pubkey_dict, block_list,
+                          follow_list)
+        for keys in feeds:
+            self.ui.listWidget_5.addItem(feeds[keys]['tweets'])
+
 
     def run(self):
         self.show()
