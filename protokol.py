@@ -96,7 +96,8 @@ def parser(data, type):  # AUTH ve BLCK hataları ana kod içerisinde yazılacak
             rdict = {
                 "status": "OK",
                 "cmd": listo,
-                "list": data[ 5: ]
+                "list": data[ 5: ],
+                "resp": listo
             }
 
         elif (command == pubkeygeldi):  # cpubkey ile gelen pubkey i alıyoruz. gönderim yaparken kendi pubkey imizi göndereceğiz.
